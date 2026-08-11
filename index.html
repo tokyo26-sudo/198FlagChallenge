@@ -1,0 +1,1097 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>国旗あてゲーム 198択</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#0D2B5B;
+    --navy-deep:#081B3D;
+    --white:#F5F7FA;
+    --red:#D01C3C;
+    --blue-accent:#7EB6FF;
+    --blue-success:#F5F7FA;
+    --panel:#123167;
+    --line:rgba(245,247,250,0.16);
+  }
+  *{box-sizing:border-box; font-variant-numeric: tabular-nums;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(circle at 12% -10%, rgba(208,28,60,0.18), transparent 40%),
+      radial-gradient(circle at 100% 0%, rgba(126,182,255,0.14), transparent 45%),
+      var(--navy-deep);
+    color:var(--white);
+    font-family:'Noto Sans JP', sans-serif;
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    padding:28px 16px 60px;
+  }
+  .app{
+    width:100%;
+    max-width:760px;
+  }
+  header{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    margin-bottom:18px;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+  .title{
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:700;
+    font-size:22px;
+    letter-spacing:0.02em;
+  }
+  .title small{
+    display:block;
+    font-family:'Noto Sans JP',sans-serif;
+    font-weight:400;
+    font-size:12px;
+    color:var(--blue-accent);
+    letter-spacing:0.14em;
+    margin-top:2px;
+  }
+  .score{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:13px;
+    color:var(--white);
+    opacity:0.8;
+    text-align:right;
+  }
+  .score b{color:var(--blue-accent); font-size:16px;}
+
+  .mode-switch{
+    display:flex;
+    gap:8px;
+    margin-bottom:20px;
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:999px;
+    padding:4px;
+  }
+  .mode-switch button{
+    flex:1;
+    border:none;
+    background:transparent;
+    color:var(--white);
+    opacity:0.6;
+    padding:10px 12px;
+    border-radius:999px;
+    font-family:'Noto Sans JP',sans-serif;
+    font-size:13px;
+    font-weight:500;
+    cursor:pointer;
+    transition:all .2s ease;
+  }
+  .mode-switch button.active{
+    background:var(--red);
+    opacity:1;
+    box-shadow:0 4px 14px rgba(208,28,60,0.4);
+  }
+
+  .challenge-status{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:14px;
+    color:var(--blue-accent);
+    font-weight:700;
+  }
+
+  .play-start-row{
+    display:flex;
+    gap:10px;
+    margin-top:4px;
+    margin-bottom:18px;
+    flex-wrap:wrap;
+  }
+  .start-btn{
+    flex:1;
+    min-width:160px;
+    border:none;
+    padding:16px 18px;
+    border-radius:14px;
+    font-family:'Noto Sans JP',sans-serif;
+    font-size:15px;
+    font-weight:700;
+    cursor:pointer;
+    text-align:center;
+    transition:transform .12s ease, box-shadow .12s ease;
+  }
+  .start-btn:hover{transform:translateY(-2px);}
+  .start-btn.normal{
+    background:var(--red);
+    color:var(--white);
+    box-shadow:0 6px 18px rgba(208,28,60,0.3);
+  }
+  .start-btn.challenge{
+    background:var(--blue-accent);
+    color:var(--navy-deep);
+    box-shadow:0 6px 18px rgba(126,182,255,0.3);
+  }
+  .start-btn small{
+    display:block;
+    font-weight:400;
+    font-size:11px;
+    margin-top:3px;
+    opacity:0.85;
+  }
+
+  .play-topbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    margin-bottom:14px;
+    flex-wrap:wrap;
+  }
+  .back-btn{
+    background:transparent;
+    border:1px solid var(--line);
+    color:rgba(244,239,227,0.75);
+    padding:8px 16px;
+    border-radius:999px;
+    font-family:'Noto Sans JP',sans-serif;
+    font-size:13px;
+    cursor:pointer;
+    white-space:nowrap;
+    transition:border-color .15s ease, color .15s ease;
+  }
+  .back-btn:hover{border-color:var(--blue-accent); color:var(--blue-accent);}
+
+  .modal-overlay{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(6,10,20,0.82);
+    backdrop-filter:blur(3px);
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+    z-index:100;
+  }
+  .modal-overlay.show{display:flex;}
+  .result-stage{
+    background:var(--panel);
+    border:1px solid var(--blue-accent);
+    border-radius:18px;
+    padding:24px 20px;
+    text-align:center;
+    width:100%;
+    max-width:440px;
+    max-height:88vh;
+    overflow-y:auto;
+    box-shadow:0 20px 60px rgba(0,0,0,0.5);
+  }
+  .result-stage .result-label{
+    font-size:11px;
+    letter-spacing:0.18em;
+    color:var(--blue-accent);
+    text-transform:uppercase;
+    margin-bottom:8px;
+    font-family:'Space Grotesk',sans-serif;
+  }
+  .result-score{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:52px;
+    font-weight:700;
+  }
+  .result-score span{font-size:20px; opacity:0.7; margin-left:4px;}
+  .result-sub{
+    margin-top:6px;
+    font-size:13px;
+    color:rgba(244,239,227,0.75);
+  }
+  .result-list{
+    margin-top:18px;
+    text-align:left;
+    max-height:340px;
+    overflow-y:auto;
+    border-top:1px solid var(--line);
+  }
+  .result-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:8px 4px;
+    border-bottom:1px solid var(--line);
+  }
+  .result-row .result-flag{
+    width:44px;
+    aspect-ratio:3/2;
+    flex:none;
+    border-radius:4px;
+    overflow:hidden;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:rgba(255,255,255,0.03);
+    border:1px solid rgba(255,255,255,0.08);
+  }
+  .result-row .result-flag img{width:100%;height:100%;object-fit:contain;display:block;}
+  .result-row .result-name{
+    flex:1;
+    font-size:13px;
+  }
+  .result-row .result-mark{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:12px;
+    font-weight:700;
+    flex:none;
+  }
+  .result-row.correct .result-mark{color:var(--blue-success);}
+  .result-row.wrong .result-mark{color:var(--red);}
+  .result-row .result-pts{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:12px;
+    color:rgba(244,239,227,0.6);
+    flex:none;
+    width:56px;
+    text-align:right;
+  }
+  .result-actions{
+    display:flex;
+    gap:10px;
+    justify-content:center;
+    margin-top:18px;
+    flex-wrap:wrap;
+  }
+  .result-actions button{
+    padding:10px 22px;
+    border-radius:999px;
+    font-family:'Noto Sans JP',sans-serif;
+    font-size:14px;
+    font-weight:500;
+    cursor:pointer;
+    border:none;
+  }
+  #retryChallengeBtn{background:var(--blue-accent); color:var(--navy-deep); font-weight:700;}
+  #endChallengeBtn{background:transparent; border:1px solid var(--line); color:var(--white);}
+
+  .stage{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:16px;
+    padding:16px 18px;
+    margin-bottom:14px;
+    position:relative;
+    overflow:hidden;
+  }
+  .stage-label{
+    font-size:11px;
+    letter-spacing:0.18em;
+    color:var(--blue-accent);
+    text-transform:uppercase;
+    margin-bottom:0;
+    font-family:'Space Grotesk',sans-serif;
+  }
+  .stage-top{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    margin-bottom:10px;
+  }
+  .pass-btn{
+    background:transparent;
+    border:1px solid var(--line);
+    color:rgba(244,239,227,0.65);
+    font-size:11px;
+    padding:5px 12px;
+    border-radius:999px;
+    cursor:pointer;
+    white-space:nowrap;
+    font-family:'Noto Sans JP',sans-serif;
+    transition:border-color .15s ease, color .15s ease;
+  }
+  .pass-btn:hover{border-color:var(--blue-accent); color:var(--blue-accent);}
+  .pass-btn:disabled{opacity:0.35; cursor:default; pointer-events:none;}
+  .question-flag{
+    width:150px;
+    max-width:55%;
+    aspect-ratio:3/2;
+    border-radius:8px;
+    margin:0 auto 4px;
+    box-shadow:0 8px 20px rgba(0,0,0,0.35);
+    border:1px solid rgba(255,255,255,0.1);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+    background:rgba(255,255,255,0.03);
+  }
+  .question-flag img{
+    width:100%;
+    height:100%;
+    object-fit:contain;
+    display:block;
+  }
+  .question-flag.emoji{
+    filter:drop-shadow(0 10px 22px rgba(0,0,0,0.4));
+  }
+  .question-name{
+    text-align:center;
+    font-family:'Space Grotesk',sans-serif;
+    font-size:26px;
+    font-weight:700;
+    padding:4px 0 0;
+    letter-spacing:0.01em;
+  }
+  .feedback{
+    text-align:center;
+    min-height:0;
+    font-size:14px;
+    font-weight:500;
+    margin-top:4px;
+  }
+  .feedback-flag{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width:42px;
+    aspect-ratio:3/2;
+    vertical-align:middle;
+    margin-right:6px;
+    border-radius:4px;
+    overflow:hidden;
+    border:1px solid rgba(255,255,255,0.2);
+    background:rgba(255,255,255,0.03);
+  }
+  .feedback-flag img{width:100%;height:100%;object-fit:contain;display:block;}
+  .feedback.correct{color:var(--blue-success);}
+  .feedback.wrong{color:var(--red);}
+
+  .stamp{
+    position:absolute;
+    top:18px;
+    right:22px;
+    border:3px solid var(--blue-success);
+    color:var(--blue-success);
+    border-radius:10px;
+    padding:4px 10px;
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:700;
+    font-size:13px;
+    letter-spacing:0.08em;
+    transform:rotate(-12deg) scale(0);
+    opacity:0;
+    transition:transform .35s cubic-bezier(.2,1.4,.4,1), opacity .2s ease;
+    pointer-events:none;
+  }
+  .stamp.show{
+    transform:rotate(-12deg) scale(1);
+    opacity:1;
+  }
+
+  .next-btn{
+    display:none;
+    margin:12px auto 0;
+    background:var(--blue-accent);
+    color:var(--navy-deep);
+    border:none;
+    padding:9px 24px;
+    border-radius:999px;
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:700;
+    font-size:14px;
+    cursor:pointer;
+  }
+  .next-btn.show{display:block;}
+
+  .filter-row{
+    margin-bottom:12px;
+  }
+  .filter-row input{
+    width:100%;
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:10px;
+    color:var(--white);
+    padding:11px 14px;
+    font-family:'Noto Sans JP',sans-serif;
+    font-size:14px;
+  }
+  .filter-row input::placeholder{color:rgba(244,239,227,0.4);}
+  .sort-row{
+    margin-bottom:12px;
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:10px 14px;
+    display:flex;
+    align-items:center;
+    gap:14px;
+    flex-wrap:wrap;
+  }
+  .sort-row .sort-label{
+    font-size:12px;
+    color:rgba(244,239,227,0.7);
+    white-space:nowrap;
+    font-family:'Space Grotesk',sans-serif;
+  }
+  .sort-row label.opt{
+    display:flex;
+    align-items:center;
+    gap:5px;
+    font-size:13px;
+    cursor:pointer;
+  }
+  .sort-row input[type="radio"]{
+    accent-color:var(--blue-accent);
+  }
+  .size-row{
+    margin-bottom:12px;
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:10px 14px;
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
+  .size-row label{
+    font-size:12px;
+    color:rgba(244,239,227,0.7);
+    white-space:nowrap;
+    font-family:'Space Grotesk',sans-serif;
+  }
+  .size-row input[type="range"]{
+    flex:1;
+    accent-color:var(--blue-accent);
+  }
+  .filter-count{
+    font-size:11px;
+    color:rgba(244,239,227,0.5);
+    margin-top:6px;
+    font-family:'Space Grotesk',sans-serif;
+  }
+
+  .choices{
+    display:grid;
+    gap:8px;
+    max-height:420px;
+    overflow-y:auto;
+    padding-right:4px;
+  }
+  .choices.flags{
+    grid-template-columns:repeat(auto-fill, minmax(var(--flag-size, 260px), 1fr));
+  }
+  .choices.names{
+    grid-template-columns:repeat(2, 1fr);
+  }
+  @media (max-width:480px){
+    .choices.flags{grid-template-columns:repeat(auto-fill, minmax(calc(var(--flag-size, 260px) * 0.75), 1fr));}
+    .choices.names{grid-template-columns:1fr;}
+  }
+
+  .choice{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:10px;
+    cursor:pointer;
+    color:var(--white);
+    font-family:'Noto Sans JP',sans-serif;
+    transition:transform .12s ease, border-color .12s ease, background .12s ease;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+  }
+  .choice:hover{transform:translateY(-2px); border-color:var(--blue-accent);}
+
+  .choice.flag-choice{
+    flex-direction:column;
+    padding:6px 4px 8px;
+  }
+  .choice.flag-choice .flag-visual{
+    width:100%;
+    aspect-ratio:3/2;
+    border-radius:5px;
+    margin-bottom:4px;
+    border:1px solid rgba(255,255,255,0.08);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+    background:rgba(255,255,255,0.03);
+  }
+  .choice.flag-choice .flag-visual img{
+    width:100%;
+    height:100%;
+    object-fit:contain;
+    display:block;
+  }
+  .choice.flag-choice .flag-visual.emoji{
+    /* SVGのtextLengthでハコいっぱいに引き伸ばすため、font-size指定は不要 */
+  }
+
+  .choice.name-choice{
+    padding:12px 10px;
+    font-size:13px;
+    font-weight:500;
+  }
+
+  .choice.correct{
+    background:rgba(245,247,250,0.22);
+    border-color:var(--blue-success);
+  }
+  .choice.wrong{
+    background:rgba(208,28,60,0.22);
+    border-color:var(--red);
+  }
+  .choice.disabled{
+    pointer-events:none;
+    opacity:0.55;
+  }
+  .choice.disabled.correct,
+  .choice.disabled.wrong{
+    opacity:1;
+  }
+
+  ::-webkit-scrollbar{width:8px;}
+  ::-webkit-scrollbar-thumb{background:rgba(244,239,227,0.2); border-radius:4px;}
+
+  footer{
+    text-align:center;
+    font-size:11px;
+    color:rgba(244,239,227,0.35);
+    margin-top:24px;
+    font-family:'Space Grotesk',sans-serif;
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="title">国旗あてゲーム<small>198択クイズ &middot; PROTOTYPE v0.4</small></div>
+  </header>
+
+  <div id="setupScreen">
+    <div class="mode-switch">
+      <button id="modeNameToFlag" class="active">国名 → 国旗を選ぶ</button>
+      <button id="modeFlagToName">国旗 → 国名を選ぶ</button>
+    </div>
+
+    <div class="play-start-row">
+      <button id="startNormalBtn" class="start-btn normal">▶ ふつうに遊ぶ<small>好きなだけ問題を解く</small></button>
+      <button id="startChallengeBtn" class="start-btn challenge">⏱ 10問タイムアタック<small>何秒で答えられるか競う</small></button>
+    </div>
+  </div>
+
+  <div id="playScreen" style="display:none;">
+    <div class="play-topbar">
+      <button class="back-btn" id="backToSetupBtn">← 設定に戻る</button>
+      <div class="score" id="normalScoreDisplay">正解 <b id="scoreCorrect">0</b> / <span id="scoreTotal">0</span></div>
+      <div class="challenge-status" id="challengeStatus" style="display:none;"></div>
+    </div>
+
+    <div class="stage" id="mainStage">
+      <div class="stamp" id="stamp">CORRECT</div>
+      <div class="stage-top">
+        <div class="stage-label" id="stageLabel">この国の国旗は？</div>
+        <button class="pass-btn" id="passBtn">わからない（パス）</button>
+      </div>
+      <div id="questionArea"></div>
+      <div class="feedback" id="feedback"></div>
+      <button class="next-btn" id="nextBtn">次の問題 →</button>
+    </div>
+
+    <div class="size-row" id="sizeRow">
+      <label for="sizeSlider">国旗の大きさ</label>
+      <input type="range" id="sizeSlider" min="140" max="420" step="10" value="260">
+    </div>
+
+    <div class="sort-row" id="sortRow">
+      <span class="sort-label">並び順</span>
+      <label class="opt"><input type="radio" name="sortMode" value="kana" checked>あいうえお順</label>
+      <label class="opt"><input type="radio" name="sortMode" value="region">地域別（あいうえお順）</label>
+      <label class="opt"><input type="radio" name="sortMode" value="en">アルファベット順（英語表記）</label>
+    </div>
+
+    <div class="choices" id="choices"></div>
+  </div>
+
+  <div class="modal-overlay" id="resultModalOverlay">
+    <div class="result-stage" id="resultStage">
+      <div class="result-label">Time Attack Result</div>
+      <div class="result-score" id="resultScore">0<span>点</span></div>
+      <div class="result-sub" id="resultSub"></div>
+      <div class="result-list" id="resultList"></div>
+      <div class="result-actions">
+        <button id="retryChallengeBtn">もう一度</button>
+        <button id="endChallengeBtn">設定に戻る</button>
+      </div>
+    </div>
+  </div>
+
+  <footer>国旗は絵文字で表示（外部通信ナシ） &middot; データはβ版（国数は暫定・後日調整予定）</footer>
+</div>
+
+<script>
+// ---- 国データ（暫定リスト）: code / name（日本語表記）/ yomi（読み・ソート用）/ region（地域）/ en（英語表記） ----
+const COUNTRIES = [
+["JP","日本","にほん","アジア","Japan"],["CN","中国","ちゅうごく","アジア","China"],["KR","大韓民国","だいかんみんこく","アジア","South Korea"],
+["KP","朝鮮民主主義人民共和国","ちょうせんみんしゅしゅぎじんみんきょうわこく","アジア","North Korea"],["TW","台湾","たいわん","アジア","Taiwan"],
+["MN","モンゴル","もんごる","アジア","Mongolia"],["IN","インド","いんど","アジア","India"],["PK","パキスタン","ぱきすたん","アジア","Pakistan"],
+["BD","バングラデシュ","ばんぐらでしゅ","アジア","Bangladesh"],["LK","スリランカ","すりらんか","アジア","Sri Lanka"],
+["NP","ネパール","ねぱーる","アジア","Nepal"],["BT","ブータン","ぶーたん","アジア","Bhutan"],["MV","モルディブ","もるでぃぶ","アジア","Maldives"],
+["MM","ミャンマー","みゃんまー","アジア","Myanmar"],["TH","タイ","たい","アジア","Thailand"],["LA","ラオス","らおす","アジア","Laos"],
+["VN","ベトナム","べとなむ","アジア","Vietnam"],["KH","カンボジア","かんぼじあ","アジア","Cambodia"],["MY","マレーシア","まれーしあ","アジア","Malaysia"],
+["SG","シンガポール","しんがぽーる","アジア","Singapore"],["ID","インドネシア","いんどねしあ","アジア","Indonesia"],["PH","フィリピン","ふぃりぴん","アジア","Philippines"],
+["BN","ブルネイ","ぶるねい","アジア","Brunei"],["TL","東ティモール","ひがしてぃもーる","アジア","Timor-Leste"],["AF","アフガニスタン","あふがにすたん","アジア","Afghanistan"],
+["IR","イラン","いらん","アジア","Iran"],["IQ","イラク","いらく","アジア","Iraq"],["SY","シリア","しりあ","アジア","Syria"],
+["LB","レバノン","ればのん","アジア","Lebanon"],["JO","ヨルダン","よるだん","アジア","Jordan"],["IL","イスラエル","いすらえる","アジア","Israel"],
+["PS","パレスチナ","ぱれすちな","アジア","Palestine"],["SA","サウジアラビア","さうじあらびあ","アジア","Saudi Arabia"],["YE","イエメン","いえめん","アジア","Yemen"],
+["OM","オマーン","おまーん","アジア","Oman"],["AE","アラブ首長国連邦","あらぶしゅちょうこくれんぽう","アジア","United Arab Emirates"],["QA","カタール","かたーる","アジア","Qatar"],
+["BH","バーレーン","ばーれーん","アジア","Bahrain"],["KW","クウェート","くうぇーと","アジア","Kuwait"],["TR","トルコ","とるこ","アジア","Turkey"],
+["CY","キプロス","きぷろす","アジア","Cyprus"],["GE","ジョージア","じょーじあ","アジア","Georgia"],["AM","アルメニア","あるめにあ","アジア","Armenia"],
+["AZ","アゼルバイジャン","あぜるばいじゃん","アジア","Azerbaijan"],["KZ","カザフスタン","かざふすたん","アジア","Kazakhstan"],["UZ","ウズベキスタン","うずべきすたん","アジア","Uzbekistan"],
+["TM","トルクメニスタン","とるくめにすたん","アジア","Turkmenistan"],["TJ","タジキスタン","たじきすたん","アジア","Tajikistan"],["KG","キルギス","きるぎす","アジア","Kyrgyzstan"],
+
+["RU","ロシア","ろしあ","ヨーロッパ","Russia"],["UA","ウクライナ","うくらいな","ヨーロッパ","Ukraine"],["BY","ベラルーシ","べらるーし","ヨーロッパ","Belarus"],
+["PL","ポーランド","ぽーらんど","ヨーロッパ","Poland"],["DE","ドイツ","どいつ","ヨーロッパ","Germany"],["FR","フランス","ふらんす","ヨーロッパ","France"],
+["GB","イギリス","いぎりす","ヨーロッパ","United Kingdom"],["IE","アイルランド","あいるらんど","ヨーロッパ","Ireland"],["NL","オランダ","おらんだ","ヨーロッパ","Netherlands"],
+["BE","ベルギー","べるぎー","ヨーロッパ","Belgium"],["LU","ルクセンブルク","るくせんぶるく","ヨーロッパ","Luxembourg"],["CH","スイス","すいす","ヨーロッパ","Switzerland"],
+["AT","オーストリア","おーすとりあ","ヨーロッパ","Austria"],["LI","リヒテンシュタイン","りひてんしゅたいん","ヨーロッパ","Liechtenstein"],["IT","イタリア","いたりあ","ヨーロッパ","Italy"],
+["ES","スペイン","すぺいん","ヨーロッパ","Spain"],["PT","ポルトガル","ぽるとがる","ヨーロッパ","Portugal"],["AD","アンドラ","あんどら","ヨーロッパ","Andorra"],
+["MC","モナコ","もなこ","ヨーロッパ","Monaco"],["SM","サンマリノ","さんまりの","ヨーロッパ","San Marino"],["VA","バチカン","ばちかん","ヨーロッパ","Vatican City"],
+["MT","マルタ","まるた","ヨーロッパ","Malta"],["GR","ギリシャ","ぎりしゃ","ヨーロッパ","Greece"],["AL","アルバニア","あるばにあ","ヨーロッパ","Albania"],
+["MK","北マケドニア","きたまけどにあ","ヨーロッパ","North Macedonia"],["RS","セルビア","せるびあ","ヨーロッパ","Serbia"],["ME","モンテネグロ","もんてねぐろ","ヨーロッパ","Montenegro"],
+["BA","ボスニア・ヘルツェゴビナ","ぼすにあへるつぇごびな","ヨーロッパ","Bosnia and Herzegovina"],["HR","クロアチア","くろあちあ","ヨーロッパ","Croatia"],["SI","スロベニア","すろべにあ","ヨーロッパ","Slovenia"],
+["HU","ハンガリー","はんがりー","ヨーロッパ","Hungary"],["SK","スロバキア","すろばきあ","ヨーロッパ","Slovakia"],["CZ","チェコ","ちぇこ","ヨーロッパ","Czechia"],
+["RO","ルーマニア","るーまにあ","ヨーロッパ","Romania"],["BG","ブルガリア","ぶるがりあ","ヨーロッパ","Bulgaria"],["MD","モルドバ","もるどば","ヨーロッパ","Moldova"],
+["LT","リトアニア","りとあにあ","ヨーロッパ","Lithuania"],["LV","ラトビア","らとびあ","ヨーロッパ","Latvia"],["EE","エストニア","えすとにあ","ヨーロッパ","Estonia"],
+["FI","フィンランド","ふぃんらんど","ヨーロッパ","Finland"],["SE","スウェーデン","すうぇーでん","ヨーロッパ","Sweden"],["NO","ノルウェー","のるうぇー","ヨーロッパ","Norway"],
+["DK","デンマーク","でんまーく","ヨーロッパ","Denmark"],["IS","アイスランド","あいすらんど","ヨーロッパ","Iceland"],["XK","コソボ","こそぼ","ヨーロッパ","Kosovo"],
+
+["EG","エジプト","えじぷと","アフリカ","Egypt"],["LY","リビア","りびあ","アフリカ","Libya"],["TN","チュニジア","ちゅにじあ","アフリカ","Tunisia"],
+["DZ","アルジェリア","あるじぇりあ","アフリカ","Algeria"],["MA","モロッコ","もろっこ","アフリカ","Morocco"],["MR","モーリタニア","もーりたにあ","アフリカ","Mauritania"],
+["ML","マリ","まり","アフリカ","Mali"],["NE","ニジェール","にじぇーる","アフリカ","Niger"],["TD","チャド","ちゃど","アフリカ","Chad"],
+["SD","スーダン","すーだん","アフリカ","Sudan"],["SS","南スーダン","みなみすーだん","アフリカ","South Sudan"],["ER","エリトリア","えりとりあ","アフリカ","Eritrea"],
+["DJ","ジブチ","じぶち","アフリカ","Djibouti"],["SO","ソマリア","そまりあ","アフリカ","Somalia"],["ET","エチオピア","えちおぴあ","アフリカ","Ethiopia"],
+["KE","ケニア","けにあ","アフリカ","Kenya"],["UG","ウガンダ","うがんだ","アフリカ","Uganda"],["TZ","タンザニア","たんざにあ","アフリカ","Tanzania"],
+["RW","ルワンダ","るわんだ","アフリカ","Rwanda"],["BI","ブルンジ","ぶるんじ","アフリカ","Burundi"],["CD","コンゴ民主共和国","こんごみんしゅきょうわこく","アフリカ","DR Congo"],
+["CG","コンゴ共和国","こんごきょうわこく","アフリカ","Congo"],["CM","カメルーン","かめるーん","アフリカ","Cameroon"],["CF","中央アフリカ共和国","ちゅうおうあふりかきょうわこく","アフリカ","Central African Republic"],
+["GA","ガボン","がぼん","アフリカ","Gabon"],["GQ","赤道ギニア","せきどうぎにあ","アフリカ","Equatorial Guinea"],["ST","サントメ・プリンシペ","さんとめぷりんしぺ","アフリカ","Sao Tome and Principe"],
+["AO","アンゴラ","あんごら","アフリカ","Angola"],["ZM","ザンビア","ざんびあ","アフリカ","Zambia"],["MW","マラウイ","まらうい","アフリカ","Malawi"],
+["MZ","モザンビーク","もざんびーく","アフリカ","Mozambique"],["ZW","ジンバブエ","じんばぶえ","アフリカ","Zimbabwe"],["BW","ボツワナ","ぼつわな","アフリカ","Botswana"],
+["NA","ナミビア","なみびあ","アフリカ","Namibia"],["ZA","南アフリカ","みなみあふりか","アフリカ","South Africa"],["LS","レソト","れそと","アフリカ","Lesotho"],
+["SZ","エスワティニ","えすわてぃに","アフリカ","Eswatini"],["MG","マダガスカル","まだがすかる","アフリカ","Madagascar"],["MU","モーリシャス","もーりしゃす","アフリカ","Mauritius"],
+["SC","セーシェル","せーしぇる","アフリカ","Seychelles"],["KM","コモロ","こもろ","アフリカ","Comoros"],["SN","セネガル","せねがる","アフリカ","Senegal"],
+["GM","ガンビア","がんびあ","アフリカ","Gambia"],["GW","ギニアビサウ","ぎにあびさう","アフリカ","Guinea-Bissau"],["GN","ギニア","ぎにあ","アフリカ","Guinea"],
+["SL","シエラレオネ","しえられおね","アフリカ","Sierra Leone"],["LR","リベリア","りべりあ","アフリカ","Liberia"],["CI","コートジボワール","こーとじぼわーる","アフリカ","Cote d'Ivoire"],
+["GH","ガーナ","がーな","アフリカ","Ghana"],["TG","トーゴ","とーご","アフリカ","Togo"],["BJ","ベナン","べなん","アフリカ","Benin"],
+["BF","ブルキナファソ","ぶるきなふぁそ","アフリカ","Burkina Faso"],["NG","ナイジェリア","ないじぇりあ","アフリカ","Nigeria"],
+
+["AU","オーストラリア","おーすとらりあ","オセアニア","Australia"],["NZ","ニュージーランド","にゅーじーらんど","オセアニア","New Zealand"],
+["PG","パプアニューギニア","ぱぷあにゅーぎにあ","オセアニア","Papua New Guinea"],["FJ","フィジー","ふぃじー","オセアニア","Fiji"],
+["SB","ソロモン諸島","そろもんしょとう","オセアニア","Solomon Islands"],["VU","バヌアツ","ばぬあつ","オセアニア","Vanuatu"],
+["WS","サモア","さもあ","オセアニア","Samoa"],["TO","トンガ","とんが","オセアニア","Tonga"],["TV","ツバル","つばる","オセアニア","Tuvalu"],
+["KI","キリバス","きりばす","オセアニア","Kiribati"],["NR","ナウル","なうる","オセアニア","Nauru"],["PW","パラオ","ぱらお","オセアニア","Palau"],
+["FM","ミクロネシア連邦","みくろねしあれんぽう","オセアニア","Micronesia"],["MH","マーシャル諸島","まーしゃるしょとう","オセアニア","Marshall Islands"],
+
+["US","アメリカ合衆国","あめりかがっしゅうこく","北アメリカ","United States"],["CA","カナダ","かなだ","北アメリカ","Canada"],["MX","メキシコ","めきしこ","北アメリカ","Mexico"],
+["GT","グアテマラ","ぐあてまら","北アメリカ","Guatemala"],["BZ","ベリーズ","べりーず","北アメリカ","Belize"],["HN","ホンジュラス","ほんじゅらす","北アメリカ","Honduras"],
+["SV","エルサルバドル","えるさるばどる","北アメリカ","El Salvador"],["NI","ニカラグア","にからぐあ","北アメリカ","Nicaragua"],["CR","コスタリカ","こすたりか","北アメリカ","Costa Rica"],
+["PA","パナマ","ぱなま","北アメリカ","Panama"],["CU","キューバ","きゅーば","北アメリカ","Cuba"],["JM","ジャマイカ","じゃまいか","北アメリカ","Jamaica"],
+["HT","ハイチ","はいち","北アメリカ","Haiti"],["DO","ドミニカ共和国","どみにかきょうわこく","北アメリカ","Dominican Republic"],["BS","バハマ","ばはま","北アメリカ","Bahamas"],
+["BB","バルバドス","ばるばどす","北アメリカ","Barbados"],["TT","トリニダード・トバゴ","とりにだーどとばご","北アメリカ","Trinidad and Tobago"],["GD","グレナダ","ぐれなだ","北アメリカ","Grenada"],
+["LC","セントルシア","せんとるしあ","北アメリカ","Saint Lucia"],["VC","セントビンセント・グレナディーン","せんとびんせんとぐれなでぃーん","北アメリカ","St Vincent and the Grenadines"],
+["AG","アンティグア・バーブーダ","あんてぃぐあばーぶーだ","北アメリカ","Antigua and Barbuda"],["KN","セントクリストファー・ネイビス","せんとくりすとふぁーねいびす","北アメリカ","Saint Kitts and Nevis"],
+["DM","ドミニカ国","どみにかこく","北アメリカ","Dominica"],
+
+["CO","コロンビア","ころんびあ","南アメリカ","Colombia"],["VE","ベネズエラ","べねずえら","南アメリカ","Venezuela"],["GY","ガイアナ","がいあな","南アメリカ","Guyana"],
+["SR","スリナム","すりなむ","南アメリカ","Suriname"],["EC","エクアドル","えくあどる","南アメリカ","Ecuador"],["PE","ペルー","ぺるー","南アメリカ","Peru"],
+["BR","ブラジル","ぶらじる","南アメリカ","Brazil"],["BO","ボリビア","ぼりびあ","南アメリカ","Bolivia"],["PY","パラグアイ","ぱらぐあい","南アメリカ","Paraguay"],
+["CL","チリ","ちり","南アメリカ","Chile"],["AR","アルゼンチン","あるぜんちん","南アメリカ","Argentina"],["UY","ウルグアイ","うるぐあい","南アメリカ","Uruguay"]
+].map(([code,name,yomi,region,en])=>({code,name,yomi,region,en}));
+
+const REGION_ORDER = ["アジア","アフリカ","オセアニア","北アメリカ","南アメリカ","ヨーロッパ"];
+
+function sortCountries(list, sortMode){
+  const sorted = [...list];
+  if(sortMode === "region"){
+    sorted.sort((a,b) => {
+      const ri = REGION_ORDER.indexOf(a.region) - REGION_ORDER.indexOf(b.region);
+      if(ri !== 0) return ri;
+      return a.yomi.localeCompare(b.yomi, 'ja');
+    });
+  }else if(sortMode === "en"){
+    sorted.sort((a,b) => a.en.localeCompare(b.en));
+  }else{
+    sorted.sort((a,b) => a.yomi.localeCompare(b.yomi, 'ja'));
+  }
+  return sorted;
+}
+
+// ---- 状態 ----
+let mode = "nameToFlag"; // or flagToName
+let current = null;
+let answered = false;
+let scoreCorrect = 0, scoreTotal = 0;
+let sortMode = "kana";
+
+// ---- タイムアタック状態 ----
+const CHALLENGE_TARGET = 10;
+let challengeActive = false;
+let challengeCount = 0;
+let challengeCorrect = 0;
+let challengeStartTime = 0;
+let challengeTimerId = null;
+let questionStartTime = 0;
+let challengeResults = []; // {code, name, correct, isPass, timeSec, points}
+const SCORE_MAX_PER_Q = 5000;
+const SCORE_DECAY_PER_TENTH = 1; // 1秒を超えてから0.1秒ごとに減点（0点になるのは501秒後）
+
+function scoreForAnswer(correct, isPass, timeSec){
+  if(isPass || !correct) return 0;
+  const overSeconds = Math.max(0, timeSec - 1);
+  const pts = SCORE_MAX_PER_Q - SCORE_DECAY_PER_TENTH * (overSeconds * 10);
+  return Math.max(0, Math.round(pts));
+}
+
+const el = {
+  questionArea: document.getElementById('questionArea'),
+  stageLabel: document.getElementById('stageLabel'),
+  choices: document.getElementById('choices'),
+  feedback: document.getElementById('feedback'),
+  nextBtn: document.getElementById('nextBtn'),
+  stamp: document.getElementById('stamp'),
+  passBtn: document.getElementById('passBtn'),
+  sortRow: document.getElementById('sortRow'),
+  sortRadios: document.querySelectorAll('input[name="sortMode"]'),
+  sizeRow: document.getElementById('sizeRow'),
+  sizeSlider: document.getElementById('sizeSlider'),
+  scoreCorrect: document.getElementById('scoreCorrect'),
+  scoreTotal: document.getElementById('scoreTotal'),
+  normalScoreDisplay: document.getElementById('normalScoreDisplay'),
+  modeNameToFlag: document.getElementById('modeNameToFlag'),
+  modeFlagToName: document.getElementById('modeFlagToName'),
+  mainStage: document.getElementById('mainStage'),
+  resultStage: document.getElementById('resultStage'),
+  resultModalOverlay: document.getElementById('resultModalOverlay'),
+  resultScore: document.getElementById('resultScore'),
+  resultSub: document.getElementById('resultSub'),
+  resultList: document.getElementById('resultList'),
+  challengeStatus: document.getElementById('challengeStatus'),
+  retryChallengeBtn: document.getElementById('retryChallengeBtn'),
+  endChallengeBtn: document.getElementById('endChallengeBtn'),
+  setupScreen: document.getElementById('setupScreen'),
+  playScreen: document.getElementById('playScreen'),
+  startNormalBtn: document.getElementById('startNormalBtn'),
+  startChallengeBtn: document.getElementById('startChallengeBtn'),
+  backToSetupBtn: document.getElementById('backToSetupBtn'),
+};
+
+function flagUrl(code){
+  return `https://flagcdn.com/w320/${code.toLowerCase()}.png`;
+}
+
+function flagEmoji(code){
+  // XKなど地域コードは正式な絵文字が無い場合があるため例外的に処理
+  if(code === "XK") return "🇽🇰";
+  return String.fromCodePoint(...[...code.toUpperCase()].map(ch => 0x1F1A5 + ch.charCodeAt(0)));
+}
+
+// 絵文字フォールバック表示：ハコいっぱいを狙って無理に幅を引き伸ばすと国旗の形が歪むため、
+// 高さをハコに合わせつつ絵文字本来の縦横比はキープする（軽いレターボックスは許容）
+function flagEmojiSvg(code){
+  const w = 150, h = 100;
+  return `<svg viewBox="0 0 ${w} ${h}" style="width:100%;height:100%;display:block;"><text x="${w/2}" y="${h/2}" font-size="${h*0.92}" text-anchor="middle" dominant-baseline="central">${flagEmoji(code)}</text></svg>`;
+}
+
+// 画像がロードできればflagcdn.comの画像を、失敗したら絵文字国旗（SVG引き伸ばし版）に自動フォールバックする
+function handleFlagImgError(imgEl){
+  const container = imgEl.parentElement;
+  container.classList.add('emoji');
+  container.innerHTML = flagEmojiSvg(container.dataset.code);
+}
+window.handleFlagImgError = handleFlagImgError;
+
+function flagVisualHtml(code, containerClass){
+  return `<div class="${containerClass}" data-code="${code}"><img src="${flagUrl(code)}" alt="${code}" onerror="handleFlagImgError(this)"></div>`;
+}
+
+function formatElapsed(ms){
+  return (ms / 1000).toFixed(2);
+}
+
+function updateChallengeStatus(){
+  if(!challengeActive){
+    el.challengeStatus.textContent = "";
+    return;
+  }
+  if(answered) return; // 回答後は表示を凍結（待ち時間ぶん伸び続けるのを防ぐ）
+  const elapsed = formatElapsed(performance.now() - questionStartTime);
+  el.challengeStatus.textContent = `この問題 ${elapsed}秒　・　${challengeCount + 1} / ${CHALLENGE_TARGET} 問目`;
+}
+
+function showSetup(){
+  el.setupScreen.style.display = "";
+  el.playScreen.style.display = "none";
+}
+
+function showPlay(){
+  el.setupScreen.style.display = "none";
+  el.playScreen.style.display = "";
+}
+
+function updateScoreDisplayMode(){
+  el.normalScoreDisplay.style.display = challengeActive ? "none" : "";
+  el.challengeStatus.style.display = challengeActive ? "" : "none";
+}
+
+function startChallenge(){
+  challengeActive = true;
+  challengeCount = 0;
+  challengeCorrect = 0;
+  challengeResults = [];
+  challengeStartTime = performance.now();
+  questionQueue = shuffle(COUNTRIES); // 10問の中で重複しないよう新しい山札でスタート
+  el.resultModalOverlay.classList.remove('show');
+  updateScoreDisplayMode();
+  showPlay();
+  if(challengeTimerId) clearInterval(challengeTimerId);
+  challengeTimerId = setInterval(updateChallengeStatus, 100);
+  pickQuestion();
+  updateChallengeStatus();
+}
+
+function stopChallengeSilently(){
+  challengeActive = false;
+  if(challengeTimerId) clearInterval(challengeTimerId);
+  challengeTimerId = null;
+  el.challengeStatus.textContent = "";
+  updateScoreDisplayMode();
+}
+
+function finishChallenge(){
+  const elapsedMs = performance.now() - challengeStartTime;
+  if(challengeTimerId) clearInterval(challengeTimerId);
+  challengeTimerId = null;
+  challengeActive = false;
+  el.challengeStatus.textContent = "";
+  updateScoreDisplayMode();
+  el.resultModalOverlay.classList.add('show');
+
+  const totalScore = challengeResults.reduce((sum, r) => sum + r.points, 0);
+  el.resultScore.innerHTML = `${totalScore.toLocaleString()}<span>点 / ${(SCORE_MAX_PER_Q*CHALLENGE_TARGET).toLocaleString()}点満点</span>`;
+  el.resultSub.textContent = `${formatElapsed(elapsedMs)}秒 ・ 10問中 ${challengeCorrect}問 正解`;
+
+  el.resultList.innerHTML = "";
+  challengeResults.forEach(r => {
+    const row = document.createElement('div');
+    row.className = "result-row " + (r.correct ? "correct" : "wrong");
+    const markText = r.isPass ? "PASS" : (r.correct ? "○" : "×");
+    row.innerHTML = `
+      ${flagVisualHtml(r.code, "result-flag")}
+      <div class="result-name">${r.name}</div>
+      <div class="result-mark">${markText}</div>
+      <div class="result-pts">${r.points.toLocaleString()}点</div>
+    `;
+    el.resultList.appendChild(row);
+  });
+}
+
+// ---- 出題キュー：全196ヶ国を出し切るまで重複させないための山札方式 ----
+let questionQueue = [];
+
+function shuffle(arr){
+  const a = [...arr];
+  for(let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function drawNextCountry(){
+  if(questionQueue.length === 0){
+    questionQueue = shuffle(COUNTRIES);
+  }
+  return questionQueue.pop();
+}
+
+function pickQuestion(){
+  current = drawNextCountry();
+  answered = false;
+  questionStartTime = performance.now();
+  el.feedback.textContent = "";
+  el.feedback.className = "feedback";
+  el.nextBtn.classList.remove('show');
+  el.stamp.classList.remove('show');
+  el.passBtn.disabled = false;
+  renderQuestion();
+  renderChoices();
+}
+
+function renderQuestion(){
+  if(mode === "nameToFlag"){
+    el.stageLabel.textContent = "この国の国旗はどれ？";
+    el.questionArea.innerHTML = `<div class="question-name">${current.name}</div>`;
+  }else{
+    el.stageLabel.textContent = "この国旗の国名はどれ？";
+    el.questionArea.innerHTML = flagVisualHtml(current.code, "question-flag");
+  }
+}
+
+function renderChoices(){
+  el.sizeRow.style.display = mode === "nameToFlag" ? "" : "none";
+  el.sortRow.style.display = mode === "flagToName" ? "" : "none";
+
+  const list = sortCountries(COUNTRIES, mode === "flagToName" ? sortMode : "kana");
+
+  el.choices.className = "choices " + (mode === "nameToFlag" ? "flags" : "names");
+  el.choices.innerHTML = "";
+
+  list.forEach(c => {
+    const btn = document.createElement('div');
+    btn.className = "choice " + (mode === "nameToFlag" ? "flag-choice" : "name-choice");
+    btn.dataset.code = c.code;
+    if(answered) btn.classList.add('disabled');
+
+    if(mode === "nameToFlag"){
+      btn.innerHTML = flagVisualHtml(c.code, "flag-visual");
+    }else{
+      btn.textContent = c.name;
+    }
+
+    if(answered && c.code === current.code) btn.classList.add('correct');
+
+    btn.addEventListener('click', () => handleAnswer(c, btn));
+    el.choices.appendChild(btn);
+  });
+}
+
+function handleAnswer(selected, btnEl){
+  if(answered) return;
+  const isCorrect = selected.code === current.code;
+  resolveQuestion({correct: isCorrect, btnEl, isPass:false});
+}
+
+function handlePass(){
+  if(answered) return;
+  resolveQuestion({correct:false, btnEl:null, isPass:true});
+}
+
+function resolveQuestion({correct, btnEl, isPass}){
+  answered = true;
+  el.passBtn.disabled = true;
+  scoreTotal++;
+  if(correct){
+    scoreCorrect++;
+    el.feedback.textContent = `正解！ ${current.name}`;
+    el.feedback.className = "feedback correct";
+    if(btnEl) btnEl.classList.add('correct');
+    el.stamp.textContent = "CORRECT";
+    el.stamp.style.borderColor = "var(--blue-success)";
+    el.stamp.style.color = "var(--blue-success)";
+  }else{
+    const flagHint = mode === "nameToFlag" ? flagVisualHtml(current.code, "feedback-flag") : "";
+    el.feedback.innerHTML = flagHint + (isPass
+      ? `パス… 正解は「${current.name}」`
+      : `不正解… 正解は「${current.name}」`);
+    el.feedback.className = "feedback wrong";
+    if(btnEl) btnEl.classList.add('wrong');
+    el.stamp.textContent = isPass ? "PASS" : "MISS";
+    el.stamp.style.borderColor = "var(--red)";
+    el.stamp.style.color = "var(--red)";
+  }
+  el.stamp.classList.add('show');
+  el.scoreCorrect.textContent = scoreCorrect;
+  el.scoreTotal.textContent = scoreTotal;
+
+  // 全選択肢を disabled にし、正解の選択肢をハイライト
+  document.querySelectorAll('.choice').forEach(b => {
+    b.classList.add('disabled');
+    if(b.dataset.code === current.code) b.classList.add('correct');
+  });
+
+  if(challengeActive){
+    const timeSec = (performance.now() - questionStartTime) / 1000;
+    const points = scoreForAnswer(correct, isPass, timeSec);
+    challengeResults.push({
+      code: current.code,
+      name: current.name,
+      correct: correct && !isPass,
+      isPass,
+      timeSec,
+      points
+    });
+    challengeCount++;
+    if(correct) challengeCorrect++;
+    el.challengeStatus.textContent = `${formatElapsed(timeSec * 1000)}秒で回答　・　${challengeCount} / ${CHALLENGE_TARGET} 問目`;
+    if(challengeCount >= CHALLENGE_TARGET){
+      setTimeout(finishChallenge, 500);
+      return;
+    }
+  }
+
+  el.nextBtn.classList.add('show');
+}
+
+el.nextBtn.addEventListener('click', pickQuestion);
+
+el.passBtn.addEventListener('click', handlePass);
+
+el.retryChallengeBtn.addEventListener('click', startChallenge);
+
+el.endChallengeBtn.addEventListener('click', () => {
+  el.resultModalOverlay.classList.remove('show');
+  scoreCorrect = 0;
+  scoreTotal = 0;
+  el.scoreCorrect.textContent = scoreCorrect;
+  el.scoreTotal.textContent = scoreTotal;
+  questionQueue = []; // 山札もリセットし、次にプレイ開始する時に新しくシャッフルさせる
+  showSetup();
+});
+
+el.sortRadios.forEach(radio => {
+  radio.addEventListener('change', (e) => {
+    if(e.target.checked){
+      sortMode = e.target.value;
+    }
+  });
+});
+
+el.sizeSlider.addEventListener('input', (e) => {
+  document.documentElement.style.setProperty('--flag-size', e.target.value + 'px');
+});
+
+el.modeNameToFlag.addEventListener('click', () => {
+  mode = "nameToFlag";
+  el.modeNameToFlag.classList.add('active');
+  el.modeFlagToName.classList.remove('active');
+});
+el.modeFlagToName.addEventListener('click', () => {
+  mode = "flagToName";
+  el.modeFlagToName.classList.add('active');
+  el.modeNameToFlag.classList.remove('active');
+});
+
+el.startNormalBtn.addEventListener('click', () => {
+  scoreCorrect = 0;
+  scoreTotal = 0;
+  el.scoreCorrect.textContent = scoreCorrect;
+  el.scoreTotal.textContent = scoreTotal;
+  questionQueue = [];
+  updateScoreDisplayMode();
+  showPlay();
+  pickQuestion();
+});
+
+el.startChallengeBtn.addEventListener('click', startChallenge);
+
+el.backToSetupBtn.addEventListener('click', () => {
+  if(challengeActive) stopChallengeSilently();
+  showSetup();
+});
+</script>
+</body>
+</html>
