@@ -27,6 +27,13 @@
     --tile3-text:#F5F7FA;
   }
   *{box-sizing:border-box; font-variant-numeric: tabular-nums;}
+  label.opt{
+    transition:color .12s ease;
+  }
+  label.opt:has(input:checked){
+    color:var(--blue-accent);
+    font-weight:700;
+  }
   html,body{margin:0;padding:0;}
   body{
     background:
@@ -725,7 +732,7 @@
 <body>
 <div class="app">
   <header>
-    <div class="title"><span data-i18n="titleText">199択国旗クイズ</span><small>v0.29</small></div>
+    <div class="title"><span data-i18n="titleText">199択国旗クイズ</span><small>v0.32</small></div>
     <div class="lang-toggle">
       <button class="lang-flag-btn active" id="langFlagJa" title="日本語">🇯🇵</button>
       <button class="lang-flag-btn" id="langFlagEn" title="English">🇬🇧</button>
@@ -852,7 +859,7 @@
     </div>
   </div>
 
-  <footer><span data-i18n="footerNote">国連加盟国193＋日本承認の非国連加盟国4（バチカン・コソボ・ニウエ・クック諸島）＋国際的に広く国として扱われる2（台湾・パレスチナ）＝199ヶ国</span> &middot; PROTOTYPE v0.29</footer>
+  <footer><span data-i18n="footerNote">国連加盟国193＋日本承認の非国連加盟国4（バチカン・コソボ・ニウエ・クック諸島）＋国際的に広く国として扱われる2（台湾・パレスチナ）＝199ヶ国</span> &middot; PROTOTYPE v0.32</footer>
 </div>
 
 <script>
@@ -1532,7 +1539,12 @@ function shuffle(arr){
 
 function drawNextCountry(){
   if(questionQueue.length === 0){
-    questionQueue = shuffle(getPool());
+    let newDeck = shuffle(getPool());
+    // 山札を引き直した直後、直前に出た国と連続で同じ問題になるのを防ぐ
+    if(current && newDeck.length > 1 && newDeck[newDeck.length - 1].code === current.code){
+      [newDeck[0], newDeck[newDeck.length - 1]] = [newDeck[newDeck.length - 1], newDeck[0]];
+    }
+    questionQueue = newDeck;
   }
   return questionQueue.pop();
 }
@@ -1657,8 +1669,9 @@ function resolveQuestion({correct, btnEl, isPass}){
         return;
       }
     }else{
-      // 3分間チャレンジ：残り時間が尽きるまで継続。時間切れはタイマー側(updateChallengeStatus)で検知
-      if(challengeEndTime - performance.now() <= 0){
+      // 3分間チャレンジ：時間切れ、または出題プールを1周し終えたら終了
+      const lappedPool = challengeCount >= getPool().length;
+      if(challengeEndTime - performance.now() <= 0 || lappedPool){
         setTimeout(finishChallenge, 500);
         return;
       }
