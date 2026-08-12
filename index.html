@@ -59,13 +59,13 @@
     letter-spacing:0.02em;
   }
   .title small{
-    display:block;
-    font-family:'Noto Sans JP',sans-serif;
+    display:inline;
+    font-family:'Space Grotesk',sans-serif;
     font-weight:400;
-    font-size:12px;
+    font-size:14px;
     color:var(--blue-accent);
-    letter-spacing:0.14em;
-    margin-top:2px;
+    letter-spacing:0.05em;
+    margin-left:8px;
   }
   .score{
     font-family:'Space Grotesk',sans-serif;
@@ -672,7 +672,7 @@
 <body>
 <div class="app">
   <header>
-    <div class="title">199択国旗クイズ</div>
+    <div class="title">199択国旗クイズ<small>v0.14</small></div>
   </header>
 
   <div id="setupScreen">
@@ -712,8 +712,8 @@
         <div class="settings-label">カラーテーマ</div>
         <div class="settings-options">
           <label class="opt"><input type="radio" name="colorTheme" value="tricolor" checked>トリコロール</label>
-          <label class="opt"><input type="radio" name="colorTheme" value="african">アフリカン（緑・黄・赤）</label>
-          <label class="opt"><input type="radio" name="colorTheme" value="middleEast">中東（緑・黒・白）</label>
+          <label class="opt"><input type="radio" name="colorTheme" value="african">汎アフリカ色</label>
+          <label class="opt"><input type="radio" name="colorTheme" value="middleEast">汎中東色</label>
         </div>
       </div>
 
@@ -785,7 +785,7 @@
     </div>
   </div>
 
-  <footer>国連加盟国193＋日本承認の非国連加盟国4（バチカン・コソボ・ニウエ・クック諸島）＋国際的に広く国として扱われる2（台湾・パレスチナ）＝199ヶ国 &middot; PROTOTYPE v0.13</footer>
+  <footer>国連加盟国193＋日本承認の非国連加盟国4（バチカン・コソボ・ニウエ・クック諸島）＋国際的に広く国として扱われる2（台湾・パレスチナ）＝199ヶ国 &middot; PROTOTYPE v0.14</footer>
 </div>
 
 <script>
