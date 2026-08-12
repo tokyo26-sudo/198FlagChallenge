@@ -52,6 +52,29 @@
     flex-wrap:wrap;
     gap:8px;
   }
+  .lang-toggle{
+    display:flex;
+    gap:4px;
+    align-self:center;
+  }
+  .lang-flag-btn{
+    background:transparent;
+    border:1px solid var(--line);
+    border-radius:999px;
+    padding:4px 8px;
+    font-size:18px;
+    line-height:1;
+    cursor:pointer;
+    opacity:0.45;
+    filter:grayscale(60%);
+    transition:opacity .15s ease, filter .15s ease, border-color .15s ease;
+  }
+  .lang-flag-btn:hover{opacity:0.8;}
+  .lang-flag-btn.active{
+    opacity:1;
+    filter:none;
+    border-color:var(--blue-accent);
+  }
   .title{
     font-family:'Space Grotesk', sans-serif;
     font-weight:700;
@@ -221,6 +244,7 @@
     transition:border-color .15s ease, color .15s ease;
   }
   .back-btn:hover{border-color:var(--blue-accent); color:var(--blue-accent);}
+  .giveup-btn:hover{border-color:var(--red); color:var(--red);}
 
   .modal-overlay{
     display:none;
@@ -676,99 +700,104 @@
 <body>
 <div class="app">
   <header>
-    <div class="title">199択国旗クイズ<small>v0.21</small></div>
+    <div class="title"><span data-i18n="titleText">199択国旗クイズ</span><small>v0.24</small></div>
+    <div class="lang-toggle">
+      <button class="lang-flag-btn active" id="langFlagJa" title="日本語">🇯🇵</button>
+      <button class="lang-flag-btn" id="langFlagEn" title="English">🇬🇧</button>
+    </div>
   </header>
 
   <div id="setupScreen">
     <div class="mode-switch">
-      <button id="modeNameToFlag" class="active">💬👀国名→🇺🇳👈️国旗を選ぶ</button>
-      <button id="modeFlagToName">🇺🇳👀国旗→💬👈️国名を選ぶ</button>
+      <button id="modeNameToFlag" class="active" data-i18n="modeNameToFlag">💬👀国名→🇺🇳👈️国旗を選ぶ</button>
+      <button id="modeFlagToName" data-i18n="modeFlagToName">🇺🇳👀国旗→💬👈️国名を選ぶ</button>
     </div>
 
     <div class="sort-row" id="answerFormatRow">
-      <span class="sort-label">出題形式</span>
-      <label class="opt"><input type="radio" name="answerFormat" value="all" checked>199択</label>
-      <label class="opt"><input type="radio" name="answerFormat" value="four">4択</label>
+      <span class="sort-label" data-i18n="answerFormatLabel">出題形式</span>
+      <label class="opt"><input type="radio" name="answerFormat" value="all" checked><span data-i18n="answerFormatAll">199択</span></label>
+      <label class="opt"><input type="radio" name="answerFormat" value="four"><span data-i18n="answerFormatFour">4択</span></label>
     </div>
 
     <div class="sort-row" id="difficultyRow">
-      <span class="sort-label">出題範囲</span>
-      <label class="opt"><input type="radio" name="difficulty" value="normal" checked>通常（199ヶ国）</label>
-      <label class="opt"><input type="radio" name="difficulty" value="easy">かんたん（人口・面積上位31ヶ国）</label>
+      <span class="sort-label" data-i18n="difficultyLabel">出題範囲</span>
+      <label class="opt"><input type="radio" name="difficulty" value="normal" checked><span data-i18n="difficultyNormal">通常（199ヶ国）</span></label>
+      <label class="opt"><input type="radio" name="difficulty" value="easy"><span data-i18n="difficultyEasy">かんたん（人口・面積上位31ヶ国）</span></label>
     </div>
 
     <div class="play-start-row">
-      <button id="startNormalBtn" class="start-btn tile1">▶ ふつうに遊ぶ<small>好きなだけ問題を解く</small></button>
-      <button id="startChallengeBtn" class="start-btn tile2">⏱ 10問タイムアタック<small>何秒で答えられるか競う</small></button>
-      <button id="startTimeChallengeBtn" class="start-btn tile3">⏳ 3分間チャレンジ<small>3分でどれだけ答えられるか</small></button>
+      <button id="startChallengeBtn" class="start-btn tile1"><span data-i18n="tileChallengeCount">⏱ 10問タイムアタック</span><small data-i18n="tileChallengeCountSub">何秒で答えられるか競う</small></button>
+      <button id="startTimeChallengeBtn" class="start-btn tile2"><span data-i18n="tileChallengeTime">⏳ 3分間チャレンジ</span><small data-i18n="tileChallengeTimeSub">3分でどれだけ答えられるか</small></button>
+      <button id="startNormalBtn" class="start-btn tile3"><span data-i18n="tileNormal">📋 ぜんぶ答える</span><small data-i18n="tileNormalSub">好きなだけ問題を解く</small></button>
     </div>
 
-    <button id="openSettingsBtn" class="settings-link">⚙ 設定（表示・テーマ・サウンド）</button>
+    <button id="openSettingsBtn" class="settings-link" data-i18n="settingsLink">⚙ 設定（表示・テーマ・サウンド・言語）</button>
   </div>
 
   <div class="modal-overlay" id="settingsModalOverlay">
     <div class="result-stage settings-modal" id="settingsModal">
-      <div class="result-label">設定</div>
+      <div class="result-label" data-i18n="settingsTitle">設定</div>
 
       <div class="settings-section" id="flagDisplayRow">
-        <div class="settings-label">国旗の表示</div>
+        <div class="settings-label" data-i18n="flagDisplayLabel">国旗の表示</div>
         <div class="settings-options">
-          <label class="opt"><input type="radio" id="flagDisplayWebRadio" name="flagDisplayMode" value="web" checked>Web画像</label>
-          <label class="opt"><input type="radio" id="flagDisplayEmojiRadio" name="flagDisplayMode" value="emoji">絵文字</label>
+          <label class="opt"><input type="radio" id="flagDisplayWebRadio" name="flagDisplayMode" value="web" checked><span data-i18n="flagDisplayWeb">Web画像</span></label>
+          <label class="opt"><input type="radio" id="flagDisplayEmojiRadio" name="flagDisplayMode" value="emoji"><span data-i18n="flagDisplayEmoji">絵文字</span></label>
         </div>
       </div>
 
       <div class="settings-section">
-        <div class="settings-label">カラーテーマ</div>
+        <div class="settings-label" data-i18n="colorThemeLabel">カラーテーマ</div>
         <div class="settings-options">
-          <label class="opt"><input type="radio" name="colorTheme" value="tricolor" checked>トリコロール</label>
-          <label class="opt"><input type="radio" name="colorTheme" value="african">汎アフリカ色</label>
-          <label class="opt"><input type="radio" name="colorTheme" value="middleEast">汎中東色</label>
+          <label class="opt"><input type="radio" name="colorTheme" value="tricolor" checked><span data-i18n="themeTricolor">トリコロール</span></label>
+          <label class="opt"><input type="radio" name="colorTheme" value="african"><span data-i18n="themeAfrican">汎アフリカ色</span></label>
+          <label class="opt"><input type="radio" name="colorTheme" value="middleEast"><span data-i18n="themeMiddleEast">汎中東色</span></label>
         </div>
       </div>
 
       <div class="settings-section">
-        <div class="settings-label">効果音（正解・不正解時のサウンド）</div>
+        <div class="settings-label" data-i18n="soundLabel">効果音（正解・不正解時のサウンド）</div>
         <div class="settings-options">
-          <label class="opt"><input type="radio" name="soundSetting" value="on" checked>鳴らす</label>
-          <label class="opt"><input type="radio" name="soundSetting" value="off">鳴らさない</label>
+          <label class="opt"><input type="radio" name="soundSetting" value="on" checked><span data-i18n="soundOn">鳴らす</span></label>
+          <label class="opt"><input type="radio" name="soundSetting" value="off"><span data-i18n="soundOff">鳴らさない</span></label>
         </div>
       </div>
 
       <div class="result-actions">
-        <button id="closeSettingsBtn">閉じる</button>
+        <button id="closeSettingsBtn" data-i18n="closeSettings">閉じる</button>
       </div>
     </div>
   </div>
 
   <div id="playScreen" style="display:none;">
     <div class="play-topbar">
-      <button class="back-btn" id="backToSetupBtn">← 設定に戻る</button>
+      <button class="back-btn" id="backToSetupBtn" data-i18n="backToSetup">← 設定に戻る</button>
       <div class="score" id="normalScoreDisplay">正解 <b id="scoreCorrect">0</b> / <span id="normalTargetDisplay">0</span></div>
       <div class="challenge-status" id="challengeStatus" style="display:none;"></div>
+      <button class="back-btn giveup-btn" id="giveUpBtn" data-i18n="giveUp">🏳️ ギブアップ</button>
     </div>
 
     <div class="stage" id="mainStage">
       <div class="stamp" id="stamp">CORRECT</div>
       <div class="stage-top">
         <div class="stage-label" id="stageLabel">この国の国旗は？</div>
-        <button class="pass-btn" id="passBtn">わからない（パス）</button>
+        <button class="pass-btn" id="passBtn" data-i18n="passBtn">わからない（パス）</button>
       </div>
       <div id="questionArea"></div>
       <div class="feedback" id="feedback"></div>
-      <button class="next-btn" id="nextBtn">次の問題 →</button>
+      <button class="next-btn" id="nextBtn" data-i18n="nextBtn">次の問題 →</button>
     </div>
 
     <div class="size-row" id="sizeRow">
-      <label for="sizeSlider">国旗の大きさ</label>
+      <label for="sizeSlider" data-i18n="sizeLabel">国旗の大きさ</label>
       <input type="range" id="sizeSlider" min="140" max="420" step="10" value="260">
     </div>
 
     <div class="sort-row" id="sortRow">
-      <span class="sort-label">並び順</span>
-      <label class="opt"><input type="radio" name="sortMode" value="kana" checked>あいうえお順</label>
-      <label class="opt"><input type="radio" name="sortMode" value="region">地域別（あいうえお順）</label>
-      <label class="opt"><input type="radio" name="sortMode" value="en">アルファベット順（英語表記）</label>
+      <span class="sort-label" data-i18n="sortLabel">並び順</span>
+      <label class="opt" id="sortKanaOpt"><input type="radio" name="sortMode" value="kana" checked><span data-i18n="sortKana">あいうえお順</span></label>
+      <label class="opt"><input type="radio" name="sortMode" value="region"><span data-i18n="sortRegion">地域別（あいうえお順）</span></label>
+      <label class="opt"><input type="radio" name="sortMode" value="en"><span data-i18n="sortEn">アルファベット順（英語表記）</span></label>
     </div>
 
     <div class="choices" id="choices"></div>
@@ -782,20 +811,20 @@
       <div class="result-list" id="resultList"></div>
 
       <div class="share-box">
-        <div class="settings-label">SNSでシェア</div>
+        <div class="settings-label" data-i18n="shareLabel">SNSでシェア</div>
         <textarea id="shareText" readonly rows="4"></textarea>
-        <button id="copyShareBtn" class="share-copy-btn">📋 コピー</button>
-        <span class="share-copied-note" id="shareCopiedNote">コピーしました！</span>
+        <button id="copyShareBtn" class="share-copy-btn" data-i18n="copyBtn">📋 コピー</button>
+        <span class="share-copied-note" id="shareCopiedNote" data-i18n="copiedNote">コピーしました！</span>
       </div>
 
       <div class="result-actions">
-        <button id="retryChallengeBtn">もう一度</button>
-        <button id="endChallengeBtn">設定に戻る</button>
+        <button id="retryChallengeBtn" data-i18n="retryBtn">もう一度</button>
+        <button id="endChallengeBtn" data-i18n="backToSetupResult">設定に戻る</button>
       </div>
     </div>
   </div>
 
-  <footer>国連加盟国193＋日本承認の非国連加盟国4（バチカン・コソボ・ニウエ・クック諸島）＋国際的に広く国として扱われる2（台湾・パレスチナ）＝199ヶ国 &middot; PROTOTYPE v0.21</footer>
+  <footer><span data-i18n="footerNote">国連加盟国193＋日本承認の非国連加盟国4（バチカン・コソボ・ニウエ・クック諸島）＋国際的に広く国として扱われる2（台湾・パレスチナ）＝199ヶ国</span> &middot; PROTOTYPE v0.24</footer>
 </div>
 
 <script>
@@ -929,6 +958,152 @@ let answered = false;
 let scoreCorrect = 0, scoreTotal = 0;
 let sortMode = "kana";
 let flagDisplayMode = "web"; // "web"(flagcdn画像) or "emoji"
+let lang = "ja"; // "ja" or "en"
+
+function countryName(c){
+  return lang === "en" ? c.en : c.name;
+}
+
+const T = {
+  ja: {
+    modeNameToFlag: "💬👀国名→🇺🇳👈️国旗を選ぶ",
+    modeFlagToName: "🇺🇳👀国旗→💬👈️国名を選ぶ",
+    answerFormatLabel: "出題形式",
+    answerFormatAll: "199択",
+    answerFormatFour: "4択",
+    difficultyLabel: "出題範囲",
+    difficultyNormal: "通常（199ヶ国）",
+    difficultyEasy: "かんたん（人口・面積上位31ヶ国）",
+    tileChallengeCount: "⏱ 10問タイムアタック",
+    tileChallengeCountSub: "何秒で答えられるか競う",
+    tileChallengeTime: "⏳ 3分間チャレンジ",
+    tileChallengeTimeSub: "3分でどれだけ答えられるか",
+    tileNormal: "📋 ぜんぶ答える",
+    tileNormalSub: "好きなだけ問題を解く",
+    settingsLink: "⚙ 設定（表示・テーマ・サウンド・言語）",
+    settingsTitle: "設定",
+    langLabel: "言語 / Language",
+    langJa: "日本語",
+    langEn: "English",
+    flagDisplayLabel: "国旗の表示",
+    flagDisplayWeb: "Web画像",
+    flagDisplayEmoji: "絵文字",
+    colorThemeLabel: "カラーテーマ",
+    themeTricolor: "トリコロール",
+    themeAfrican: "汎アフリカ色",
+    themeMiddleEast: "汎中東色",
+    soundLabel: "効果音（正解・不正解時のサウンド）",
+    soundOn: "鳴らす",
+    soundOff: "鳴らさない",
+    closeSettings: "閉じる",
+    backToSetup: "← 設定に戻る",
+    giveUp: "🏳️ ギブアップ",
+    giveUpConfirm: "ここでギブアップしますか？ここまでの結果を表示します。",
+    passBtn: "わからない（パス）",
+    nextBtn: "次の問題 →",
+    stageLabelNameToFlag: "この国の国旗はどれ？",
+    stageLabelFlagToName: "この国旗の国名はどれ？",
+    sizeLabel: "国旗の大きさ",
+    sortLabel: "並び順",
+    sortKana: "あいうえお順",
+    sortRegion: "地域別（あいうえお順）",
+    sortEn: "アルファベット順（英語表記）",
+    shareLabel: "SNSでシェア",
+    copyBtn: "📋 コピー",
+    copiedNote: "コピーしました！",
+    retryBtn: "もう一度",
+    backToSetupResult: "設定に戻る",
+    correctPrefix: "正解！",
+    wrongPrefix: "不正解…",
+    passPrefix: "パス…",
+    answerIs: (name) => `正解は「${name}」`,
+    resultTitleTimeAttack: "Time Attack Result",
+    resultTitleComplete: "Complete!",
+    resultTitleGiveUp: "Give Up",
+    elapsedRemaining: (t, n) => `残り ${t}　・　${n}問 回答済み`,
+    elapsedThisQ: (t, n, target) => `この問題 ${t}秒　・　${n} / ${target} 問目`,
+    elapsedThisQAnswered: (t, n, target) => `${t}秒で回答　・　${n} / ${target} 問目`,
+    resultSubCountGaveUp: (t, total, correct) => `${t}秒 ・ ${total}問に挑戦し ${correct}問 正解（ギブアップ）`,
+    resultSubCountDone: (t, correct) => `${t}秒 ・ 10問中 ${correct}問 正解`,
+    resultSubTime: (total, correct) => `3分間で ${total}問 回答 ・ ${correct}問 正解`,
+    resultSubLapDone: (target) => `全${target}問 完了`,
+    resultSubLapGiveUp: (n) => `${n}問に挑戦して終了（ギブアップ）`,
+    scoreOutOf: (total) => `点 / ${total}点満点`,
+    scoreSuffix: "点",
+    correctOutOf: (target) => ` / ${target}問 正解`,
+    titleText: "199択国旗クイズ",
+    footerNote: "国連加盟国193＋日本承認の非国連加盟国4（バチカン・コソボ・ニウエ・クック諸島）＋国際的に広く国として扱われる2（台湾・パレスチナ）＝199ヶ国",
+  },
+  en: {
+    modeNameToFlag: "💬👀Name→🇺🇳👈️Pick the Flag",
+    modeFlagToName: "🇺🇳👀Flag→💬👈️Pick the Name",
+    answerFormatLabel: "Question Format",
+    answerFormatAll: "199-choice",
+    answerFormatFour: "4-choice",
+    difficultyLabel: "Question Pool",
+    difficultyNormal: "Normal (199 countries)",
+    difficultyEasy: "Easy (Top 31 by population/area)",
+    tileChallengeCount: "⏱ 10-Question Time Attack",
+    tileChallengeCountSub: "Race to answer fast",
+    tileChallengeTime: "⏳ 3-Minute Challenge",
+    tileChallengeTimeSub: "Answer as many as you can",
+    tileNormal: "📋 Answer Them All",
+    tileNormalSub: "Play at your own pace",
+    settingsLink: "⚙ Settings (display, theme, sound, language)",
+    settingsTitle: "Settings",
+    langLabel: "言語 / Language",
+    langJa: "日本語",
+    langEn: "English",
+    flagDisplayLabel: "Flag display",
+    flagDisplayWeb: "Web image",
+    flagDisplayEmoji: "Emoji",
+    colorThemeLabel: "Color theme",
+    themeTricolor: "Tricolor",
+    themeAfrican: "Pan-African",
+    themeMiddleEast: "Pan-Arab",
+    soundLabel: "Sound effects (correct/wrong)",
+    soundOn: "On",
+    soundOff: "Off",
+    closeSettings: "Close",
+    backToSetup: "← Back to Setup",
+    giveUp: "🏳️ Give Up",
+    giveUpConfirm: "Give up now? Your results so far will be shown.",
+    passBtn: "Don't know (Pass)",
+    nextBtn: "Next Question →",
+    stageLabelNameToFlag: "Which flag is this?",
+    stageLabelFlagToName: "Which country is this flag?",
+    sizeLabel: "Flag size",
+    sortLabel: "Sort order",
+    sortKana: "Japanese order",
+    sortRegion: "By region (A-Z)",
+    sortEn: "Alphabetical (A-Z)",
+    shareLabel: "Share on SNS",
+    copyBtn: "📋 Copy",
+    copiedNote: "Copied!",
+    retryBtn: "Try Again",
+    backToSetupResult: "Back to Setup",
+    correctPrefix: "Correct!",
+    wrongPrefix: "Wrong…",
+    passPrefix: "Passed…",
+    answerIs: (name) => `The answer was "${name}"`,
+    resultTitleTimeAttack: "Time Attack Result",
+    resultTitleComplete: "Complete!",
+    resultTitleGiveUp: "Give Up",
+    elapsedRemaining: (t, n) => `${t} left　・　${n} answered`,
+    elapsedThisQ: (t, n, target) => `${t}s on this Q　・　${n} / ${target}`,
+    elapsedThisQAnswered: (t, n, target) => `Answered in ${t}s　・　${n} / ${target}`,
+    resultSubCountGaveUp: (t, total, correct) => `${t}s ・ Attempted ${total}, got ${correct} right (gave up)`,
+    resultSubCountDone: (t, correct) => `${t}s ・ ${correct} / 10 correct`,
+    resultSubTime: (total, correct) => `${total} answered in 3 min ・ ${correct} correct`,
+    resultSubLapDone: (target) => `All ${target} questions complete`,
+    resultSubLapGiveUp: (n) => `Attempted ${n} questions (gave up)`,
+    scoreOutOf: (total) => ` pts / ${total} max`,
+    scoreSuffix: " pts",
+    correctOutOf: (target) => ` / ${target} correct`,
+    titleText: "199-Choice Flag Quiz",
+    footerNote: "193 UN members + 4 non-UN states recognized by Japan (Vatican, Kosovo, Niue, Cook Islands) + 2 widely recognized non-UN entities (Taiwan, Palestine) = 199 countries",
+  },
+};
 let difficulty = "normal"; // "normal"(199ヶ国) or "easy"(上位31ヶ国)
 let answerFormat = "all"; // "all"(全選択肢) or "four"(4択・同地域から出題)
 let normalPlayActive = false;
@@ -945,6 +1120,28 @@ const THEMES = {
   middleEast:{"--navy":"#1B1B1B","--navy-deep":"#0D0D0D","--white":"#F5F5F0","--red":"#1E7145","--blue-accent":"#2FA866","--blue-success":"#2FA866","--panel":"#242424","--stamp-gold":"#E8C168",
     "--tile1-bg":"#C81E3A","--tile1-text":"#F5F5F0","--tile2-bg":"#F5F5F0","--tile2-text":"#1B1B1B","--tile3-bg":"#1E7145","--tile3-text":"#F5F5F0"},
 };
+
+function applyLanguage(newLang){
+  lang = newLang;
+  document.querySelectorAll('[data-i18n]').forEach(node => {
+    const key = node.dataset.i18n;
+    if(T[lang][key] !== undefined) node.textContent = T[lang][key];
+  });
+  el.langFlagJa.classList.toggle('active', lang === "ja");
+  el.langFlagEn.classList.toggle('active', lang === "en");
+  // 「あいうえお順」は英語だと意味をなさないため、英語モードでは非表示にしてアルファベット順に切り替える
+  const kanaOpt = document.getElementById('sortKanaOpt');
+  if(kanaOpt){
+    kanaOpt.style.display = lang === "en" ? "none" : "";
+  }
+  if(lang === "en" && sortMode === "kana"){
+    sortMode = "en";
+    const enRadio = document.querySelector('input[name="sortMode"][value="en"]');
+    if(enRadio) enRadio.checked = true;
+  }
+  el.stageLabel.textContent = mode === "nameToFlag" ? T[lang].stageLabelNameToFlag : T[lang].stageLabelFlagToName;
+  if(current) renderChoices();
+}
 
 function applyTheme(themeName){
   const t = THEMES[themeName] || THEMES.tricolor;
@@ -1033,6 +1230,8 @@ const el = {
   sortRow: document.getElementById('sortRow'),
   sortRadios: document.querySelectorAll('input[name="sortMode"]'),
   flagDisplayRadios: document.querySelectorAll('input[name="flagDisplayMode"]'),
+  langFlagJa: document.getElementById('langFlagJa'),
+  langFlagEn: document.getElementById('langFlagEn'),
   difficultyRadios: document.querySelectorAll('input[name="difficulty"]'),
   answerFormatRadios: document.querySelectorAll('input[name="answerFormat"]'),
   colorThemeRadios: document.querySelectorAll('input[name="colorTheme"]'),
@@ -1066,6 +1265,7 @@ const el = {
   startChallengeBtn: document.getElementById('startChallengeBtn'),
   startTimeChallengeBtn: document.getElementById('startTimeChallengeBtn'),
   backToSetupBtn: document.getElementById('backToSetupBtn'),
+  giveUpBtn: document.getElementById('giveUpBtn'),
 };
 
 function flagUrl(code){
@@ -1115,12 +1315,12 @@ function updateChallengeStatus(){
       finishChallenge();
       return;
     }
-    el.challengeStatus.textContent = `残り ${formatCountdown(remaining)}　・　${challengeCount}問 回答済み`;
+    el.challengeStatus.textContent = T[lang].elapsedRemaining(formatCountdown(remaining), challengeCount);
     return;
   }
   if(answered) return; // 回答後は表示を凍結（待ち時間ぶん伸び続けるのを防ぐ）
   const elapsed = formatElapsed(performance.now() - questionStartTime);
-  el.challengeStatus.textContent = `この問題 ${elapsed}秒　・　${challengeCount + 1} / ${CHALLENGE_TARGET} 問目`;
+  el.challengeStatus.textContent = T[lang].elapsedThisQ(elapsed, challengeCount + 1, CHALLENGE_TARGET);
 }
 
 function showSetup(){
@@ -1175,18 +1375,22 @@ function finishChallenge(){
   updateScoreDisplayMode();
   el.resultModalOverlay.classList.add('show');
   el.resultStage.classList.remove('lap-mode');
-  el.resultLabel.textContent = "Time Attack Result";
+  el.resultLabel.textContent = T[lang].resultTitleTimeAttack;
 
   const totalScore = challengeResults.reduce((sum, r) => sum + r.points, 0);
   const totalAnswered = challengeResults.length;
+  const gaveUp = challengeType === "count" ? totalAnswered < CHALLENGE_TARGET : false;
   let shareLine1;
   if(challengeType === "count"){
-    el.resultScore.innerHTML = `${totalScore.toLocaleString()}<span>点 / ${(SCORE_MAX_PER_Q*CHALLENGE_TARGET).toLocaleString()}点満点</span>`;
-    el.resultSub.textContent = `${formatElapsed(elapsedMs)}秒 ・ 10問中 ${challengeCorrect}問 正解`;
+    const maxPossible = SCORE_MAX_PER_Q * totalAnswered;
+    el.resultScore.innerHTML = `${totalScore.toLocaleString()}<span>${T[lang].scoreOutOf(maxPossible.toLocaleString())}</span>`;
+    el.resultSub.textContent = gaveUp
+      ? T[lang].resultSubCountGaveUp(formatElapsed(elapsedMs), totalAnswered, challengeCorrect)
+      : T[lang].resultSubCountDone(formatElapsed(elapsedMs), challengeCorrect);
     shareLine1 = `199択国旗クイズ【10問タイムアタック】\n${totalScore.toLocaleString()}点（${formatElapsed(elapsedMs)}秒 / 正解${challengeCorrect}問）`;
   }else{
-    el.resultScore.innerHTML = `${totalScore.toLocaleString()}<span>点</span>`;
-    el.resultSub.textContent = `3分間で ${totalAnswered}問 回答 ・ ${challengeCorrect}問 正解`;
+    el.resultScore.innerHTML = `${totalScore.toLocaleString()}<span>${T[lang].scoreSuffix}</span>`;
+    el.resultSub.textContent = T[lang].resultSubTime(totalAnswered, challengeCorrect);
     shareLine1 = `199択国旗クイズ【3分間チャレンジ】\n${totalScore.toLocaleString()}点（${totalAnswered}問回答 / 正解${challengeCorrect}問）`;
   }
   el.shareText.value = `${shareLine1}\n${location.href}`;
@@ -1199,9 +1403,9 @@ function finishChallenge(){
     const markText = r.isPass ? "PASS" : (r.correct ? "○" : "×");
     row.innerHTML = `
       ${flagVisualHtml(r.code, "result-flag")}
-      <div class="result-name">${r.name}</div>
+      <div class="result-name">${lang === "en" ? r.en : r.name}</div>
       <div class="result-mark">${markText}</div>
-      <div class="result-pts">${r.points.toLocaleString()}点</div>
+      <div class="result-pts">${r.points.toLocaleString()}${T[lang].scoreSuffix}</div>
     `;
     el.resultList.appendChild(row);
   });
@@ -1241,10 +1445,10 @@ function pickQuestion(){
 
 function renderQuestion(){
   if(mode === "nameToFlag"){
-    el.stageLabel.textContent = "この国の国旗はどれ？";
-    el.questionArea.innerHTML = `<div class="question-name">${current.name}</div>`;
+    el.stageLabel.textContent = T[lang].stageLabelNameToFlag;
+    el.questionArea.innerHTML = `<div class="question-name">${countryName(current)}</div>`;
   }else{
-    el.stageLabel.textContent = "この国旗の国名はどれ？";
+    el.stageLabel.textContent = T[lang].stageLabelFlagToName;
     el.questionArea.innerHTML = flagVisualHtml(current.code, "question-flag");
   }
 }
@@ -1269,7 +1473,7 @@ function renderChoices(){
     if(mode === "nameToFlag"){
       btn.innerHTML = flagVisualHtml(c.code, "flag-visual");
     }else{
-      btn.textContent = c.name;
+      btn.textContent = countryName(c);
     }
 
     if(answered && c.code === current.code) btn.classList.add('correct');
@@ -1296,7 +1500,7 @@ function resolveQuestion({correct, btnEl, isPass}){
   scoreTotal++;
   if(correct){
     scoreCorrect++;
-    el.feedback.textContent = `正解！ ${current.name}`;
+    el.feedback.textContent = `${T[lang].correctPrefix} ${countryName(current)}`;
     el.feedback.className = "feedback correct";
     if(btnEl) btnEl.classList.add('correct');
     el.stamp.textContent = "CORRECT";
@@ -1306,8 +1510,8 @@ function resolveQuestion({correct, btnEl, isPass}){
   }else{
     const flagHint = mode === "nameToFlag" ? flagVisualHtml(current.code, "feedback-flag") : "";
     el.feedback.innerHTML = flagHint + (isPass
-      ? `パス… 正解は「${current.name}」`
-      : `不正解… 正解は「${current.name}」`);
+      ? `${T[lang].passPrefix} ${T[lang].answerIs(countryName(current))}`
+      : `${T[lang].wrongPrefix} ${T[lang].answerIs(countryName(current))}`);
     el.feedback.className = "feedback wrong";
     if(btnEl) btnEl.classList.add('wrong');
     el.stamp.textContent = isPass ? "PASS" : "MISS";
@@ -1330,6 +1534,7 @@ function resolveQuestion({correct, btnEl, isPass}){
     challengeResults.push({
       code: current.code,
       name: current.name,
+      en: current.en,
       correct: correct && !isPass,
       isPass,
       timeSec,
@@ -1338,7 +1543,7 @@ function resolveQuestion({correct, btnEl, isPass}){
     challengeCount++;
     if(correct) challengeCorrect++;
     if(challengeType === "count"){
-      el.challengeStatus.textContent = `${formatElapsed(timeSec * 1000)}秒で回答　・　${challengeCount} / ${CHALLENGE_TARGET} 問目`;
+      el.challengeStatus.textContent = T[lang].elapsedThisQAnswered(formatElapsed(timeSec * 1000), challengeCount, CHALLENGE_TARGET);
       if(challengeCount >= CHALLENGE_TARGET){
         setTimeout(finishChallenge, 500);
         return;
@@ -1423,6 +1628,9 @@ el.flagDisplayRadios.forEach(radio => {
   });
 });
 
+el.langFlagJa.addEventListener('click', () => applyLanguage('ja'));
+el.langFlagEn.addEventListener('click', () => applyLanguage('en'));
+
 el.difficultyRadios.forEach(radio => {
   radio.addEventListener('change', (e) => {
     if(e.target.checked){
@@ -1502,11 +1710,16 @@ function startNormalPlay(){
 
 function finishNormalPlay(){
   normalPlayActive = false;
+  const gaveUp = normalAnswered < normalTarget;
   el.resultModalOverlay.classList.add('show');
   el.resultStage.classList.add('lap-mode');
-  el.resultLabel.textContent = "Complete!";
-  el.resultScore.innerHTML = `${scoreCorrect}<span> / ${normalTarget}問 正解</span>`;
-  el.resultSub.textContent = `全${normalTarget}問 完了`;
+  el.resultLabel.textContent = gaveUp ? T[lang].resultTitleGiveUp : T[lang].resultTitleComplete;
+  el.resultScore.innerHTML = gaveUp
+    ? `${scoreCorrect}<span>${T[lang].correctOutOf(normalAnswered)}</span>`
+    : `${scoreCorrect}<span>${T[lang].correctOutOf(normalTarget)}</span>`;
+  el.resultSub.textContent = gaveUp
+    ? T[lang].resultSubLapGiveUp(normalAnswered)
+    : T[lang].resultSubLapDone(normalTarget);
 }
 
 el.startNormalBtn.addEventListener('click', startNormalPlay);
@@ -1518,6 +1731,15 @@ el.backToSetupBtn.addEventListener('click', () => {
   if(challengeActive) stopChallengeSilently();
   normalPlayActive = false;
   showSetup();
+});
+
+el.giveUpBtn.addEventListener('click', () => {
+  if(!confirm(T[lang].giveUpConfirm)) return;
+  if(challengeActive){
+    finishChallenge();
+  }else if(normalPlayActive){
+    finishNormalPlay();
+  }
 });
 
 // ---- 国旗Web画像が読み込める環境かどうかを起動時に判定し、読み込めない場合はWeb画像の選択肢を無効化する ----
