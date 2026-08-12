@@ -312,6 +312,10 @@
     width:56px;
     text-align:right;
   }
+  .result-stage.lap-mode .result-list,
+  .result-stage.lap-mode .share-box{
+    display:none;
+  }
   .share-box{
     margin-top:18px;
     padding-top:14px;
@@ -672,7 +676,7 @@
 <body>
 <div class="app">
   <header>
-    <div class="title">199択国旗クイズ<small>v0.16</small></div>
+    <div class="title">199択国旗クイズ<small>v0.21</small></div>
   </header>
 
   <div id="setupScreen">
@@ -681,8 +685,14 @@
       <button id="modeFlagToName">🇺🇳👀国旗→💬👈️国名を選ぶ</button>
     </div>
 
+    <div class="sort-row" id="answerFormatRow">
+      <span class="sort-label">出題形式</span>
+      <label class="opt"><input type="radio" name="answerFormat" value="all" checked>199択</label>
+      <label class="opt"><input type="radio" name="answerFormat" value="four">4択</label>
+    </div>
+
     <div class="sort-row" id="difficultyRow">
-      <span class="sort-label">難易度</span>
+      <span class="sort-label">出題範囲</span>
       <label class="opt"><input type="radio" name="difficulty" value="normal" checked>通常（199ヶ国）</label>
       <label class="opt"><input type="radio" name="difficulty" value="easy">かんたん（人口・面積上位31ヶ国）</label>
     </div>
@@ -734,7 +744,7 @@
   <div id="playScreen" style="display:none;">
     <div class="play-topbar">
       <button class="back-btn" id="backToSetupBtn">← 設定に戻る</button>
-      <div class="score" id="normalScoreDisplay">正解 <b id="scoreCorrect">0</b> / <span id="scoreTotal">0</span></div>
+      <div class="score" id="normalScoreDisplay">正解 <b id="scoreCorrect">0</b> / <span id="normalTargetDisplay">0</span></div>
       <div class="challenge-status" id="challengeStatus" style="display:none;"></div>
     </div>
 
@@ -766,7 +776,7 @@
 
   <div class="modal-overlay" id="resultModalOverlay">
     <div class="result-stage" id="resultStage">
-      <div class="result-label">Time Attack Result</div>
+      <div class="result-label" id="resultLabel">Time Attack Result</div>
       <div class="result-score" id="resultScore">0<span>点</span></div>
       <div class="result-sub" id="resultSub"></div>
       <div class="result-list" id="resultList"></div>
@@ -785,7 +795,7 @@
     </div>
   </div>
 
-  <footer>国連加盟国193＋日本承認の非国連加盟国4（バチカン・コソボ・ニウエ・クック諸島）＋国際的に広く国として扱われる2（台湾・パレスチナ）＝199ヶ国 &middot; PROTOTYPE v0.16</footer>
+  <footer>国連加盟国193＋日本承認の非国連加盟国4（バチカン・コソボ・ニウエ・クック諸島）＋国際的に広く国として扱われる2（台湾・パレスチナ）＝199ヶ国 &middot; PROTOTYPE v0.21</footer>
 </div>
 
 <script>
@@ -882,6 +892,20 @@ function getPool(){
 
 const REGION_ORDER = ["アジア","アフリカ","オセアニア","北アメリカ","南アメリカ","ヨーロッパ"];
 
+// 4択モード用：正解と同じ地域から紛らわしい3ヶ国を選ぶ（地域内が足りない場合はプール全体から補う）
+function pickFourChoiceOptions(pool, correctCountry){
+  const sameRegion = shuffle(pool.filter(c => c.region === correctCountry.region && c.code !== correctCountry.code));
+  const distractors = sameRegion.slice(0, 3);
+  if(distractors.length < 3){
+    const usedCodes = new Set([correctCountry.code, ...distractors.map(c => c.code)]);
+    const rest = shuffle(pool.filter(c => !usedCodes.has(c.code)));
+    while(distractors.length < 3 && rest.length){
+      distractors.push(rest.pop());
+    }
+  }
+  return shuffle([correctCountry, ...distractors]);
+}
+
 function sortCountries(list, sortMode){
   const sorted = [...list];
   if(sortMode === "region"){
@@ -906,6 +930,11 @@ let scoreCorrect = 0, scoreTotal = 0;
 let sortMode = "kana";
 let flagDisplayMode = "web"; // "web"(flagcdn画像) or "emoji"
 let difficulty = "normal"; // "normal"(199ヶ国) or "easy"(上位31ヶ国)
+let answerFormat = "all"; // "all"(全選択肢) or "four"(4択・同地域から出題)
+let normalPlayActive = false;
+let normalTarget = 0;
+let normalAnswered = 0;
+let currentRetryFn = null;
 let soundEnabled = true;
 
 const THEMES = {
@@ -1005,6 +1034,7 @@ const el = {
   sortRadios: document.querySelectorAll('input[name="sortMode"]'),
   flagDisplayRadios: document.querySelectorAll('input[name="flagDisplayMode"]'),
   difficultyRadios: document.querySelectorAll('input[name="difficulty"]'),
+  answerFormatRadios: document.querySelectorAll('input[name="answerFormat"]'),
   colorThemeRadios: document.querySelectorAll('input[name="colorTheme"]'),
   soundRadios: document.querySelectorAll('input[name="soundSetting"]'),
   openSettingsBtn: document.getElementById('openSettingsBtn'),
@@ -1013,12 +1043,13 @@ const el = {
   sizeRow: document.getElementById('sizeRow'),
   sizeSlider: document.getElementById('sizeSlider'),
   scoreCorrect: document.getElementById('scoreCorrect'),
-  scoreTotal: document.getElementById('scoreTotal'),
+  normalTargetDisplay: document.getElementById('normalTargetDisplay'),
   normalScoreDisplay: document.getElementById('normalScoreDisplay'),
   modeNameToFlag: document.getElementById('modeNameToFlag'),
   modeFlagToName: document.getElementById('modeFlagToName'),
   mainStage: document.getElementById('mainStage'),
   resultStage: document.getElementById('resultStage'),
+  resultLabel: document.getElementById('resultLabel'),
   resultModalOverlay: document.getElementById('resultModalOverlay'),
   resultScore: document.getElementById('resultScore'),
   resultSub: document.getElementById('resultSub'),
@@ -1110,6 +1141,7 @@ function updateScoreDisplayMode(){
 function startChallenge(type){
   challengeType = type || "count";
   challengeActive = true;
+  normalPlayActive = false;
   challengeCount = 0;
   challengeCorrect = 0;
   challengeResults = [];
@@ -1119,6 +1151,7 @@ function startChallenge(type){
   el.resultModalOverlay.classList.remove('show');
   updateScoreDisplayMode();
   showPlay();
+  currentRetryFn = () => startChallenge(challengeType);
   if(challengeTimerId) clearInterval(challengeTimerId);
   challengeTimerId = setInterval(updateChallengeStatus, 100);
   pickQuestion();
@@ -1141,6 +1174,8 @@ function finishChallenge(){
   el.challengeStatus.textContent = "";
   updateScoreDisplayMode();
   el.resultModalOverlay.classList.add('show');
+  el.resultStage.classList.remove('lap-mode');
+  el.resultLabel.textContent = "Time Attack Result";
 
   const totalScore = challengeResults.reduce((sum, r) => sum + r.points, 0);
   const totalAnswered = challengeResults.length;
@@ -1216,9 +1251,11 @@ function renderQuestion(){
 
 function renderChoices(){
   el.sizeRow.style.display = mode === "nameToFlag" ? "" : "none";
-  el.sortRow.style.display = mode === "flagToName" ? "" : "none";
+  el.sortRow.style.display = (mode === "flagToName" && answerFormat === "all") ? "" : "none";
 
-  const list = sortCountries(getPool(), mode === "flagToName" ? sortMode : "kana");
+  const list = answerFormat === "four"
+    ? pickFourChoiceOptions(getPool(), current)
+    : sortCountries(getPool(), mode === "flagToName" ? sortMode : "kana");
 
   el.choices.className = "choices " + (mode === "nameToFlag" ? "flags" : "names");
   el.choices.innerHTML = "";
@@ -1280,7 +1317,6 @@ function resolveQuestion({correct, btnEl, isPass}){
   }
   el.stamp.classList.add('show');
   el.scoreCorrect.textContent = scoreCorrect;
-  el.scoreTotal.textContent = scoreTotal;
 
   // 全選択肢を disabled にし、正解の選択肢をハイライト
   document.querySelectorAll('.choice').forEach(b => {
@@ -1316,6 +1352,14 @@ function resolveQuestion({correct, btnEl, isPass}){
     }
   }
 
+  if(normalPlayActive){
+    normalAnswered++;
+    if(normalAnswered >= normalTarget){
+      setTimeout(finishNormalPlay, 500);
+      return;
+    }
+  }
+
   el.nextBtn.classList.add('show');
 }
 
@@ -1323,7 +1367,9 @@ el.nextBtn.addEventListener('click', pickQuestion);
 
 el.passBtn.addEventListener('click', handlePass);
 
-el.retryChallengeBtn.addEventListener('click', () => startChallenge(challengeType));
+el.retryChallengeBtn.addEventListener('click', () => {
+  if(currentRetryFn) currentRetryFn();
+});
 
 el.copyShareBtn.addEventListener('click', async () => {
   const text = el.shareText.value;
@@ -1354,8 +1400,8 @@ el.endChallengeBtn.addEventListener('click', () => {
   el.resultModalOverlay.classList.remove('show');
   scoreCorrect = 0;
   scoreTotal = 0;
+  normalPlayActive = false;
   el.scoreCorrect.textContent = scoreCorrect;
-  el.scoreTotal.textContent = scoreTotal;
   questionQueue = []; // 山札もリセットし、次にプレイ開始する時に新しくシャッフルさせる
   showSetup();
 });
@@ -1381,6 +1427,14 @@ el.difficultyRadios.forEach(radio => {
   radio.addEventListener('change', (e) => {
     if(e.target.checked){
       difficulty = e.target.value;
+    }
+  });
+});
+
+el.answerFormatRadios.forEach(radio => {
+  radio.addEventListener('change', (e) => {
+    if(e.target.checked){
+      answerFormat = e.target.value;
     }
   });
 });
@@ -1430,22 +1484,39 @@ el.modeFlagToName.addEventListener('click', () => {
   el.modeNameToFlag.classList.remove('active');
 });
 
-el.startNormalBtn.addEventListener('click', () => {
+function startNormalPlay(){
   scoreCorrect = 0;
   scoreTotal = 0;
+  normalPlayActive = true;
+  normalAnswered = 0;
+  normalTarget = getPool().length;
   el.scoreCorrect.textContent = scoreCorrect;
-  el.scoreTotal.textContent = scoreTotal;
+  el.normalTargetDisplay.textContent = normalTarget;
+  el.resultModalOverlay.classList.remove('show');
   questionQueue = [];
   updateScoreDisplayMode();
   showPlay();
+  currentRetryFn = startNormalPlay;
   pickQuestion();
-});
+}
+
+function finishNormalPlay(){
+  normalPlayActive = false;
+  el.resultModalOverlay.classList.add('show');
+  el.resultStage.classList.add('lap-mode');
+  el.resultLabel.textContent = "Complete!";
+  el.resultScore.innerHTML = `${scoreCorrect}<span> / ${normalTarget}問 正解</span>`;
+  el.resultSub.textContent = `全${normalTarget}問 完了`;
+}
+
+el.startNormalBtn.addEventListener('click', startNormalPlay);
 
 el.startChallengeBtn.addEventListener('click', () => startChallenge('count'));
 el.startTimeChallengeBtn.addEventListener('click', () => startChallenge('time'));
 
 el.backToSetupBtn.addEventListener('click', () => {
   if(challengeActive) stopChallengeSilently();
+  normalPlayActive = false;
   showSetup();
 });
 
