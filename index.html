@@ -962,7 +962,7 @@ let challengeEndTime = 0;
 let challengeTimerId = null;
 let questionStartTime = 0;
 let challengeResults = []; // {code, name, correct, isPass, timeSec, points}
-const SCORE_MAX_PER_Q = 5000;
+const SCORE_MAX_PER_Q = 1000;
 const SCORE_DECAY_PER_TENTH = 1; // 1秒を超えてから0.1秒ごとに減点（0点になるのは501秒後）
 
 function scoreForAnswer(correct, isPass, timeSec){
