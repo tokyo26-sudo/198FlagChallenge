@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>国旗あてゲーム 198択</title>
+<title>199択国旗クイズ</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%F0%9F%87%BA%F0%9F%87%B3</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -19,6 +19,12 @@
     --panel:#123167;
     --stamp-gold:#F0B429;
     --line:rgba(245,247,250,0.16);
+    --tile1-bg:#2B4EA8;
+    --tile1-text:#F5F7FA;
+    --tile2-bg:#F5F7FA;
+    --tile2-text:#0D2B5B;
+    --tile3-bg:#D01C3C;
+    --tile3-text:#F5F7FA;
   }
   *{box-sizing:border-box; font-variant-numeric: tabular-nums;}
   html,body{margin:0;padding:0;}
@@ -171,15 +177,20 @@
     transition:transform .12s ease, box-shadow .12s ease;
   }
   .start-btn:hover{transform:translateY(-2px);}
-  .start-btn.normal{
-    background:var(--red);
-    color:var(--white);
-    box-shadow:0 6px 18px rgba(208,28,60,0.3);
+  .start-btn.tile1{
+    background:var(--tile1-bg);
+    color:var(--tile1-text);
+    box-shadow:0 6px 18px rgba(0,0,0,0.25);
   }
-  .start-btn.challenge{
-    background:var(--blue-accent);
-    color:var(--navy-deep);
-    box-shadow:0 6px 18px rgba(126,182,255,0.3);
+  .start-btn.tile2{
+    background:var(--tile2-bg);
+    color:var(--tile2-text);
+    box-shadow:0 6px 18px rgba(0,0,0,0.25);
+  }
+  .start-btn.tile3{
+    background:var(--tile3-bg);
+    color:var(--tile3-text);
+    box-shadow:0 6px 18px rgba(0,0,0,0.25);
   }
   .start-btn small{
     display:block;
@@ -661,7 +672,7 @@
 <body>
 <div class="app">
   <header>
-    <div class="title">国旗あてゲーム<small>198択クイズ &middot; PROTOTYPE v0.11</small></div>
+    <div class="title">199択国旗クイズ</div>
   </header>
 
   <div id="setupScreen">
@@ -672,14 +683,14 @@
 
     <div class="sort-row" id="difficultyRow">
       <span class="sort-label">難易度</span>
-      <label class="opt"><input type="radio" name="difficulty" value="normal" checked>通常（196ヶ国）</label>
+      <label class="opt"><input type="radio" name="difficulty" value="normal" checked>通常（199ヶ国）</label>
       <label class="opt"><input type="radio" name="difficulty" value="easy">かんたん（人口・面積上位31ヶ国）</label>
     </div>
 
     <div class="play-start-row">
-      <button id="startNormalBtn" class="start-btn normal">▶ ふつうに遊ぶ<small>好きなだけ問題を解く</small></button>
-      <button id="startChallengeBtn" class="start-btn challenge">⏱ 10問タイムアタック<small>何秒で答えられるか競う</small></button>
-      <button id="startTimeChallengeBtn" class="start-btn challenge">⏳ 3分間チャレンジ<small>3分でどれだけ答えられるか</small></button>
+      <button id="startNormalBtn" class="start-btn tile1">▶ ふつうに遊ぶ<small>好きなだけ問題を解く</small></button>
+      <button id="startChallengeBtn" class="start-btn tile2">⏱ 10問タイムアタック<small>何秒で答えられるか競う</small></button>
+      <button id="startTimeChallengeBtn" class="start-btn tile3">⏳ 3分間チャレンジ<small>3分でどれだけ答えられるか</small></button>
     </div>
 
     <button id="openSettingsBtn" class="settings-link">⚙ 設定（表示・テーマ・サウンド）</button>
@@ -774,7 +785,7 @@
     </div>
   </div>
 
-  <footer>国旗は絵文字で表示（外部通信ナシ） &middot; データはβ版（国数は暫定・後日調整予定）</footer>
+  <footer>国連加盟国193＋日本承認の非国連加盟国4（バチカン・コソボ・ニウエ・クック諸島）＋国際的に広く国として扱われる2（台湾・パレスチナ）＝199ヶ国 &middot; PROTOTYPE v0.13</footer>
 </div>
 
 <script>
@@ -827,7 +838,7 @@ const COUNTRIES = [
 ["MZ","モザンビーク","もざんびーく","アフリカ","Mozambique"],["ZW","ジンバブエ","じんばぶえ","アフリカ","Zimbabwe"],["BW","ボツワナ","ぼつわな","アフリカ","Botswana"],
 ["NA","ナミビア","なみびあ","アフリカ","Namibia"],["ZA","南アフリカ","みなみあふりか","アフリカ","South Africa"],["LS","レソト","れそと","アフリカ","Lesotho"],
 ["SZ","エスワティニ","えすわてぃに","アフリカ","Eswatini"],["MG","マダガスカル","まだがすかる","アフリカ","Madagascar"],["MU","モーリシャス","もーりしゃす","アフリカ","Mauritius"],
-["SC","セーシェル","せーしぇる","アフリカ","Seychelles"],["KM","コモロ","こもろ","アフリカ","Comoros"],["SN","セネガル","せねがる","アフリカ","Senegal"],
+["SC","セーシェル","せーしぇる","アフリカ","Seychelles"],["KM","コモロ","こもろ","アフリカ","Comoros"],["CV","カーボベルデ","かーぼべるで","アフリカ","Cape Verde"],["SN","セネガル","せねがる","アフリカ","Senegal"],
 ["GM","ガンビア","がんびあ","アフリカ","Gambia"],["GW","ギニアビサウ","ぎにあびさう","アフリカ","Guinea-Bissau"],["GN","ギニア","ぎにあ","アフリカ","Guinea"],
 ["SL","シエラレオネ","しえられおね","アフリカ","Sierra Leone"],["LR","リベリア","りべりあ","アフリカ","Liberia"],["CI","コートジボワール","こーとじぼわーる","アフリカ","Cote d'Ivoire"],
 ["GH","ガーナ","がーな","アフリカ","Ghana"],["TG","トーゴ","とーご","アフリカ","Togo"],["BJ","ベナン","べなん","アフリカ","Benin"],
@@ -838,7 +849,7 @@ const COUNTRIES = [
 ["SB","ソロモン諸島","そろもんしょとう","オセアニア","Solomon Islands"],["VU","バヌアツ","ばぬあつ","オセアニア","Vanuatu"],
 ["WS","サモア","さもあ","オセアニア","Samoa"],["TO","トンガ","とんが","オセアニア","Tonga"],["TV","ツバル","つばる","オセアニア","Tuvalu"],
 ["KI","キリバス","きりばす","オセアニア","Kiribati"],["NR","ナウル","なうる","オセアニア","Nauru"],["PW","パラオ","ぱらお","オセアニア","Palau"],
-["FM","ミクロネシア連邦","みくろねしあれんぽう","オセアニア","Micronesia"],["MH","マーシャル諸島","まーしゃるしょとう","オセアニア","Marshall Islands"],
+["FM","ミクロネシア連邦","みくろねしあれんぽう","オセアニア","Micronesia"],["MH","マーシャル諸島","まーしゃるしょとう","オセアニア","Marshall Islands"],["NU","ニウエ","にうえ","オセアニア","Niue"],["CK","クック諸島","くっくしょとう","オセアニア","Cook Islands"],
 
 ["US","アメリカ合衆国","あめりかがっしゅうこく","北アメリカ","United States"],["CA","カナダ","かなだ","北アメリカ","Canada"],["MX","メキシコ","めきしこ","北アメリカ","Mexico"],
 ["GT","グアテマラ","ぐあてまら","北アメリカ","Guatemala"],["BZ","ベリーズ","べりーず","北アメリカ","Belize"],["HN","ホンジュラス","ほんじゅらす","北アメリカ","Honduras"],
@@ -894,13 +905,16 @@ let answered = false;
 let scoreCorrect = 0, scoreTotal = 0;
 let sortMode = "kana";
 let flagDisplayMode = "web"; // "web"(flagcdn画像) or "emoji"
-let difficulty = "normal"; // "normal"(196ヶ国) or "easy"(上位31ヶ国)
+let difficulty = "normal"; // "normal"(199ヶ国) or "easy"(上位31ヶ国)
 let soundEnabled = true;
 
 const THEMES = {
-  tricolor: {"--navy":"#0D2B5B","--navy-deep":"#081B3D","--white":"#F5F7FA","--red":"#D01C3C","--blue-accent":"#7EB6FF","--blue-success":"#3D7DE0","--panel":"#123167","--stamp-gold":"#F0B429"},
-  african:  {"--navy":"#1F4D2E","--navy-deep":"#12301C","--white":"#FFF8E3","--red":"#D21F3C","--blue-accent":"#F4C430","--blue-success":"#6FCF6B","--panel":"#234D1E","--stamp-gold":"#F4C430"},
-  middleEast:{"--navy":"#1B1B1B","--navy-deep":"#0D0D0D","--white":"#F5F5F0","--red":"#1E7145","--blue-accent":"#2FA866","--blue-success":"#2FA866","--panel":"#242424","--stamp-gold":"#E8C168"},
+  tricolor: {"--navy":"#0D2B5B","--navy-deep":"#081B3D","--white":"#F5F7FA","--red":"#D01C3C","--blue-accent":"#7EB6FF","--blue-success":"#3D7DE0","--panel":"#123167","--stamp-gold":"#F0B429",
+    "--tile1-bg":"#2B4EA8","--tile1-text":"#F5F7FA","--tile2-bg":"#F5F7FA","--tile2-text":"#0D2B5B","--tile3-bg":"#D01C3C","--tile3-text":"#F5F7FA"},
+  african:  {"--navy":"#1F4D2E","--navy-deep":"#12301C","--white":"#FFF8E3","--red":"#D21F3C","--blue-accent":"#F4C430","--blue-success":"#6FCF6B","--panel":"#234D1E","--stamp-gold":"#F4C430",
+    "--tile1-bg":"#2E9E4F","--tile1-text":"#FFF8E3","--tile2-bg":"#F4C430","--tile2-text":"#1F4D2E","--tile3-bg":"#D21F3C","--tile3-text":"#FFF8E3"},
+  middleEast:{"--navy":"#1B1B1B","--navy-deep":"#0D0D0D","--white":"#F5F5F0","--red":"#1E7145","--blue-accent":"#2FA866","--blue-success":"#2FA866","--panel":"#242424","--stamp-gold":"#E8C168",
+    "--tile1-bg":"#C81E3A","--tile1-text":"#F5F5F0","--tile2-bg":"#F5F5F0","--tile2-text":"#1B1B1B","--tile3-bg":"#1E7145","--tile3-text":"#F5F5F0"},
 };
 
 function applyTheme(themeName){
@@ -1134,11 +1148,11 @@ function finishChallenge(){
   if(challengeType === "count"){
     el.resultScore.innerHTML = `${totalScore.toLocaleString()}<span>点 / ${(SCORE_MAX_PER_Q*CHALLENGE_TARGET).toLocaleString()}点満点</span>`;
     el.resultSub.textContent = `${formatElapsed(elapsedMs)}秒 ・ 10問中 ${challengeCorrect}問 正解`;
-    shareLine1 = `国旗あてゲーム【10問タイムアタック】\n${totalScore.toLocaleString()}点（${formatElapsed(elapsedMs)}秒 / 正解${challengeCorrect}問）`;
+    shareLine1 = `199択国旗クイズ【10問タイムアタック】\n${totalScore.toLocaleString()}点（${formatElapsed(elapsedMs)}秒 / 正解${challengeCorrect}問）`;
   }else{
     el.resultScore.innerHTML = `${totalScore.toLocaleString()}<span>点</span>`;
     el.resultSub.textContent = `3分間で ${totalAnswered}問 回答 ・ ${challengeCorrect}問 正解`;
-    shareLine1 = `国旗あてゲーム【3分間チャレンジ】\n${totalScore.toLocaleString()}点（${totalAnswered}問回答 / 正解${challengeCorrect}問）`;
+    shareLine1 = `199択国旗クイズ【3分間チャレンジ】\n${totalScore.toLocaleString()}点（${totalAnswered}問回答 / 正解${challengeCorrect}問）`;
   }
   el.shareText.value = `${shareLine1}\n${location.href}`;
   el.shareCopiedNote.classList.remove('show');
@@ -1158,7 +1172,7 @@ function finishChallenge(){
   });
 }
 
-// ---- 出題キュー：全196ヶ国を出し切るまで重複させないための山札方式 ----
+// ---- 出題キュー：全199ヶ国を出し切るまで重複させないための山札方式 ----
 let questionQueue = [];
 
 function shuffle(arr){
