@@ -30,9 +30,42 @@
   label.opt{
     transition:color .12s ease;
   }
-  label.opt:has(input:checked){
-    color:var(--blue-accent);
+  label.opt.opt-active{
+    color:var(--blue-accent) !important;
     font-weight:700;
+  }
+  label.opt:has(input:checked){
+    color:var(--blue-accent) !important;
+    font-weight:700;
+  }
+  /* ラジオボタンの見た目をブラウザ依存にせず完全に自前で描画する */
+  label.opt input[type="radio"]{
+    -webkit-appearance:none;
+    appearance:none;
+    width:15px;
+    height:15px;
+    min-width:15px;
+    border:2px solid rgba(245,247,250,0.5);
+    border-radius:50%;
+    margin:0;
+    cursor:pointer;
+    position:relative;
+    background:transparent;
+    flex:none;
+  }
+  label.opt input[type="radio"]:checked{
+    border-color:var(--blue-accent);
+  }
+  label.opt input[type="radio"]:checked::after{
+    content:"";
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    width:7px;
+    height:7px;
+    border-radius:50%;
+    background:var(--blue-accent);
   }
   html,body{margin:0;padding:0;}
   body{
@@ -255,6 +288,12 @@
   }
   .back-btn:hover{border-color:var(--blue-accent); color:var(--blue-accent);}
   .giveup-btn:hover{border-color:var(--red); color:var(--red);}
+  .giveup-btn.armed{
+    border-color:var(--red);
+    color:var(--red);
+    background:rgba(208,28,60,0.15);
+    font-weight:700;
+  }
 
   .modal-overlay{
     display:none;
@@ -732,7 +771,7 @@
 <body>
 <div class="app">
   <header>
-    <div class="title"><span data-i18n="titleText">199択国旗クイズ</span><small>v0.32</small></div>
+    <div class="title"><span data-i18n="titleText">199択国旗クイズ</span><small>v0.38</small></div>
     <div class="lang-toggle">
       <button class="lang-flag-btn active" id="langFlagJa" title="日本語">🇯🇵</button>
       <button class="lang-flag-btn" id="langFlagEn" title="English">🇬🇧</button>
@@ -824,8 +863,9 @@
       <label for="sizeSlider" data-i18n="sizeLabel">国旗の大きさ</label>
       <input type="range" id="sizeSlider" min="140" max="420" step="10" value="260">
       <div class="flag-sort-options" id="flagSortRow">
-        <label class="opt" id="flagSortKanaOpt"><input type="radio" name="sortMode" value="kana"><span data-i18n="sortKana">アイウエオ順</span></label>
-        <label class="opt"><input type="radio" name="sortMode" value="region"><span data-i18n="sortRegionShort">地域順</span></label>
+        <label class="opt" id="flagSortKanaOpt"><input type="radio" name="sortModeFlag" value="kana"><span data-i18n="sortKana">アイウエオ順</span></label>
+        <label class="opt"><input type="radio" name="sortModeFlag" value="region"><span data-i18n="sortRegionShort">地域順</span></label>
+        <label class="opt" id="flagSortEnOpt" style="display:none;"><input type="radio" name="sortModeFlag" value="en"><span data-i18n="sortEnShort">ABC順</span></label>
       </div>
     </div>
 
@@ -859,7 +899,7 @@
     </div>
   </div>
 
-  <footer><span data-i18n="footerNote">国連加盟国193＋日本承認の非国連加盟国4（バチカン・コソボ・ニウエ・クック諸島）＋国際的に広く国として扱われる2（台湾・パレスチナ）＝199ヶ国</span> &middot; PROTOTYPE v0.32</footer>
+  <footer><span data-i18n="footerNote">国連加盟国193＋日本承認の非国連加盟国4（バチカン・コソボ・ニウエ・クック諸島）＋国際的に広く国として扱われる2（台湾・パレスチナ）＝199ヶ国</span> &middot; PROTOTYPE v0.38</footer>
 </div>
 
 <script>
@@ -1107,6 +1147,7 @@ const T = {
     backToSetup: "← 戻る",
     giveUp: "🏳️ 降参",
     giveUpConfirm: "ここで降参しますか？ここまでの結果を表示します。",
+    giveUpConfirmShort: "本当に降参？（もう一度押す）",
     passBtn: "わからない（パス）",
     nextBtn: "次の問題 →",
     stageLabelNameToFlag: "この国の国旗はどれ？",
@@ -1117,6 +1158,7 @@ const T = {
     sortRegion: "地域別（あいうえお順）",
     sortRegionShort: "地域順",
     sortEn: "アルファベット順（英語表記）",
+    sortEnShort: "ABC順",
     shareLabel: "SNSでシェア",
     copyBtn: "📋 コピー",
     copiedNote: "コピーしました！",
@@ -1177,6 +1219,7 @@ const T = {
     backToSetup: "← Back to Setup",
     giveUp: "🏳️ Give Up",
     giveUpConfirm: "Give up now? Your results so far will be shown.",
+    giveUpConfirmShort: "Sure? (tap again)",
     passBtn: "Don't know (Pass)",
     nextBtn: "Next Question →",
     stageLabelNameToFlag: "Which flag is this?",
@@ -1187,6 +1230,7 @@ const T = {
     sortRegion: "By region (A-Z)",
     sortRegionShort: "By region",
     sortEn: "Alphabetical (A-Z)",
+    sortEnShort: "A-Z",
     shareLabel: "Share on SNS",
     copyBtn: "📋 Copy",
     copiedNote: "Copied!",
@@ -1244,6 +1288,8 @@ function applyLanguage(newLang){
     const opt = document.getElementById(id);
     if(opt) opt.style.display = lang === "en" ? "none" : "";
   });
+  const flagSortEnOpt = document.getElementById('flagSortEnOpt');
+  if(flagSortEnOpt) flagSortEnOpt.style.display = lang === "en" ? "" : "none";
   if(lang === "en" && sortMode === "kana"){
     sortMode = "en";
   }
@@ -1339,7 +1385,7 @@ const el = {
   stamp: document.getElementById('stamp'),
   passBtn: document.getElementById('passBtn'),
   sortRow: document.getElementById('sortRow'),
-  sortRadios: document.querySelectorAll('input[name="sortMode"]'),
+  sortRadios: document.querySelectorAll('input[name="sortMode"], input[name="sortModeFlag"]'),
   flagDisplayRadios: document.querySelectorAll('input[name="flagDisplayMode"]'),
   langFlagJa: document.getElementById('langFlagJa'),
   langFlagEn: document.getElementById('langFlagEn'),
@@ -1733,10 +1779,27 @@ el.endChallengeBtn.addEventListener('click', () => {
 });
 
 function syncSortRadios(){
-  document.querySelectorAll('input[name="sortMode"]').forEach(r => {
+  document.querySelectorAll('input[name="sortMode"], input[name="sortModeFlag"]').forEach(r => {
     r.checked = (r.value === sortMode);
   });
+  updateOptActiveStyles('sortMode');
+  updateOptActiveStyles('sortModeFlag');
 }
+
+// ラジオボタンの選択状態を、囲んでいるlabel.optの見た目（色・太字）に確実に反映させる
+function updateOptActiveStyles(radioName){
+  document.querySelectorAll(`input[name="${radioName}"]`).forEach(input => {
+    const label = input.closest('label.opt');
+    if(label) label.classList.toggle('opt-active', input.checked);
+  });
+}
+
+// すべてのラジオボタングループを対象に、変更されたら見た目を同期する
+document.addEventListener('change', (e) => {
+  if(e.target.matches('input[type="radio"]') && e.target.name){
+    updateOptActiveStyles(e.target.name);
+  }
+});
 
 el.sortRadios.forEach(radio => {
   radio.addEventListener('change', (e) => {
@@ -1861,8 +1924,26 @@ el.backToSetupBtn.addEventListener('click', () => {
   showSetup();
 });
 
+let giveUpArmed = false;
+let giveUpTimer = null;
+
 el.giveUpBtn.addEventListener('click', () => {
-  if(!confirm(T[lang].giveUpConfirm)) return;
+  if(!giveUpArmed){
+    giveUpArmed = true;
+    el.giveUpBtn.textContent = T[lang].giveUpConfirmShort;
+    el.giveUpBtn.classList.add('armed');
+    if(giveUpTimer) clearTimeout(giveUpTimer);
+    giveUpTimer = setTimeout(() => {
+      giveUpArmed = false;
+      el.giveUpBtn.textContent = T[lang].giveUp;
+      el.giveUpBtn.classList.remove('armed');
+    }, 3000);
+    return;
+  }
+  clearTimeout(giveUpTimer);
+  giveUpArmed = false;
+  el.giveUpBtn.textContent = T[lang].giveUp;
+  el.giveUpBtn.classList.remove('armed');
   if(challengeActive){
     finishChallenge();
   }else if(normalPlayActive){
@@ -1897,6 +1978,7 @@ el.giveUpBtn.addEventListener('click', () => {
 })();
 
 syncSortRadios();
+["answerFormat", "difficulty", "colorTheme", "soundSetting", "flagDisplayMode"].forEach(updateOptActiveStyles);
 </script>
 </body>
 </html>
