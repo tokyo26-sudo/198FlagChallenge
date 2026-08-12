@@ -113,6 +113,50 @@
     margin-bottom:18px;
     flex-wrap:wrap;
   }
+  .settings-link{
+    display:block;
+    width:100%;
+    background:transparent;
+    border:1px solid var(--line);
+    color:rgba(245,247,250,0.7);
+    padding:10px 16px;
+    border-radius:10px;
+    font-family:'Noto Sans JP',sans-serif;
+    font-size:13px;
+    cursor:pointer;
+    text-align:center;
+    transition:border-color .15s ease, color .15s ease;
+  }
+  .settings-link:hover{border-color:var(--blue-accent); color:var(--blue-accent);}
+  .settings-modal{
+    text-align:left;
+  }
+  .settings-modal .result-label{
+    text-align:center;
+  }
+  .settings-section{
+    margin-top:16px;
+  }
+  .settings-section:first-of-type{margin-top:10px;}
+  .settings-label{
+    font-size:12px;
+    color:rgba(245,247,250,0.7);
+    font-family:'Space Grotesk',sans-serif;
+    margin-bottom:8px;
+  }
+  .settings-options{
+    display:flex;
+    gap:14px;
+    flex-wrap:wrap;
+  }
+  .settings-options label.opt{
+    display:flex;
+    align-items:center;
+    gap:5px;
+    font-size:13px;
+    cursor:pointer;
+  }
+  .settings-options input[type="radio"]{accent-color:var(--blue-accent);}
   .start-btn{
     flex:1;
     min-width:160px;
@@ -156,7 +200,7 @@
   .back-btn{
     background:transparent;
     border:1px solid var(--line);
-    color:rgba(244,239,227,0.75);
+    color:rgba(245,247,250,0.75);
     padding:8px 16px;
     border-radius:999px;
     font-family:'Noto Sans JP',sans-serif;
@@ -208,7 +252,7 @@
   .result-sub{
     margin-top:6px;
     font-size:13px;
-    color:rgba(244,239,227,0.75);
+    color:rgba(245,247,250,0.75);
   }
   .result-list{
     margin-top:18px;
@@ -252,11 +296,51 @@
   .result-row .result-pts{
     font-family:'Space Grotesk',sans-serif;
     font-size:12px;
-    color:rgba(244,239,227,0.6);
+    color:rgba(245,247,250,0.6);
     flex:none;
     width:56px;
     text-align:right;
   }
+  .share-box{
+    margin-top:18px;
+    padding-top:14px;
+    border-top:1px solid var(--line);
+    text-align:left;
+  }
+  .share-box textarea{
+    width:100%;
+    resize:none;
+    background:var(--navy-deep);
+    border:1px solid var(--line);
+    border-radius:8px;
+    color:var(--white);
+    font-family:'Noto Sans JP',sans-serif;
+    font-size:12px;
+    padding:10px;
+    margin-top:6px;
+    margin-bottom:8px;
+  }
+  .share-copy-btn{
+    background:transparent;
+    border:1px solid var(--blue-accent);
+    color:var(--blue-accent);
+    padding:8px 18px;
+    border-radius:999px;
+    font-family:'Noto Sans JP',sans-serif;
+    font-size:13px;
+    font-weight:500;
+    cursor:pointer;
+  }
+  .share-copy-btn:hover{background:var(--blue-accent); color:var(--navy-deep);}
+  .share-copied-note{
+    margin-left:10px;
+    font-size:12px;
+    color:var(--blue-success);
+    opacity:0;
+    transition:opacity .2s ease;
+  }
+  .share-copied-note.show{opacity:1;}
+
   .result-actions{
     display:flex;
     gap:10px;
@@ -303,7 +387,7 @@
   .pass-btn{
     background:transparent;
     border:1px solid var(--line);
-    color:rgba(244,239,227,0.65);
+    color:rgba(245,247,250,0.65);
     font-size:11px;
     padding:5px 12px;
     border-radius:999px;
@@ -419,7 +503,7 @@
     font-family:'Noto Sans JP',sans-serif;
     font-size:14px;
   }
-  .filter-row input::placeholder{color:rgba(244,239,227,0.4);}
+  .filter-row input::placeholder{color:rgba(245,247,250,0.4);}
   .sort-row{
     margin-bottom:12px;
     background:var(--panel);
@@ -433,9 +517,15 @@
   }
   .sort-row .sort-label{
     font-size:12px;
-    color:rgba(244,239,227,0.7);
+    color:rgba(245,247,250,0.7);
     white-space:nowrap;
     font-family:'Space Grotesk',sans-serif;
+  }
+  .flag-display-note{
+    width:100%;
+    font-size:11px;
+    color:rgba(245,247,250,0.55);
+    margin-top:2px;
   }
   .sort-row label.opt{
     display:flex;
@@ -459,7 +549,7 @@
   }
   .size-row label{
     font-size:12px;
-    color:rgba(244,239,227,0.7);
+    color:rgba(245,247,250,0.7);
     white-space:nowrap;
     font-family:'Space Grotesk',sans-serif;
   }
@@ -469,7 +559,7 @@
   }
   .filter-count{
     font-size:11px;
-    color:rgba(244,239,227,0.5);
+    color:rgba(245,247,250,0.5);
     margin-top:6px;
     font-family:'Space Grotesk',sans-serif;
   }
@@ -557,12 +647,12 @@
   }
 
   ::-webkit-scrollbar{width:8px;}
-  ::-webkit-scrollbar-thumb{background:rgba(244,239,227,0.2); border-radius:4px;}
+  ::-webkit-scrollbar-thumb{background:rgba(245,247,250,0.2); border-radius:4px;}
 
   footer{
     text-align:center;
     font-size:11px;
-    color:rgba(244,239,227,0.35);
+    color:rgba(245,247,250,0.35);
     margin-top:24px;
     font-family:'Space Grotesk',sans-serif;
   }
@@ -571,7 +661,7 @@
 <body>
 <div class="app">
   <header>
-    <div class="title">国旗あてゲーム<small>198択クイズ &middot; PROTOTYPE v0.5</small></div>
+    <div class="title">国旗あてゲーム<small>198択クイズ &middot; PROTOTYPE v0.11</small></div>
   </header>
 
   <div id="setupScreen">
@@ -580,16 +670,53 @@
       <button id="modeFlagToName">国旗 → 国名を選ぶ</button>
     </div>
 
-    <div class="sort-row" id="flagDisplayRow">
-      <span class="sort-label">国旗の表示</span>
-      <label class="opt"><input type="radio" name="flagDisplayMode" value="web" checked>Web画像</label>
-      <label class="opt"><input type="radio" name="flagDisplayMode" value="emoji">絵文字</label>
+    <div class="sort-row" id="difficultyRow">
+      <span class="sort-label">難易度</span>
+      <label class="opt"><input type="radio" name="difficulty" value="normal" checked>通常（196ヶ国）</label>
+      <label class="opt"><input type="radio" name="difficulty" value="easy">かんたん（人口・面積上位31ヶ国）</label>
     </div>
 
     <div class="play-start-row">
       <button id="startNormalBtn" class="start-btn normal">▶ ふつうに遊ぶ<small>好きなだけ問題を解く</small></button>
       <button id="startChallengeBtn" class="start-btn challenge">⏱ 10問タイムアタック<small>何秒で答えられるか競う</small></button>
       <button id="startTimeChallengeBtn" class="start-btn challenge">⏳ 3分間チャレンジ<small>3分でどれだけ答えられるか</small></button>
+    </div>
+
+    <button id="openSettingsBtn" class="settings-link">⚙ 設定（表示・テーマ・サウンド）</button>
+  </div>
+
+  <div class="modal-overlay" id="settingsModalOverlay">
+    <div class="result-stage settings-modal" id="settingsModal">
+      <div class="result-label">設定</div>
+
+      <div class="settings-section" id="flagDisplayRow">
+        <div class="settings-label">国旗の表示</div>
+        <div class="settings-options">
+          <label class="opt"><input type="radio" id="flagDisplayWebRadio" name="flagDisplayMode" value="web" checked>Web画像</label>
+          <label class="opt"><input type="radio" id="flagDisplayEmojiRadio" name="flagDisplayMode" value="emoji">絵文字</label>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-label">カラーテーマ</div>
+        <div class="settings-options">
+          <label class="opt"><input type="radio" name="colorTheme" value="tricolor" checked>トリコロール</label>
+          <label class="opt"><input type="radio" name="colorTheme" value="african">アフリカン（緑・黄・赤）</label>
+          <label class="opt"><input type="radio" name="colorTheme" value="middleEast">中東（緑・黒・白）</label>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-label">効果音（正解・不正解時のサウンド）</div>
+        <div class="settings-options">
+          <label class="opt"><input type="radio" name="soundSetting" value="on" checked>鳴らす</label>
+          <label class="opt"><input type="radio" name="soundSetting" value="off">鳴らさない</label>
+        </div>
+      </div>
+
+      <div class="result-actions">
+        <button id="closeSettingsBtn">閉じる</button>
+      </div>
     </div>
   </div>
 
@@ -632,6 +759,14 @@
       <div class="result-score" id="resultScore">0<span>点</span></div>
       <div class="result-sub" id="resultSub"></div>
       <div class="result-list" id="resultList"></div>
+
+      <div class="share-box">
+        <div class="settings-label">SNSでシェア</div>
+        <textarea id="shareText" readonly rows="4"></textarea>
+        <button id="copyShareBtn" class="share-copy-btn">📋 コピー</button>
+        <span class="share-copied-note" id="shareCopiedNote">コピーしました！</span>
+      </div>
+
       <div class="result-actions">
         <button id="retryChallengeBtn">もう一度</button>
         <button id="endChallengeBtn">設定に戻る</button>
@@ -721,6 +856,19 @@ const COUNTRIES = [
 ["CL","チリ","ちり","南アメリカ","Chile"],["AR","アルゼンチン","あるぜんちん","南アメリカ","Argentina"],["UY","ウルグアイ","うるぐあい","南アメリカ","Uruguay"]
 ].map(([code,name,yomi,region,en])=>({code,name,yomi,region,en}));
 
+// かんたんモード用：人口上位20ヶ国＋面積上位20ヶ国（重複除くと31ヶ国）
+const EASY_CODES = new Set([
+  // 人口上位20
+  "IN","CN","US","ID","PK","NG","BR","BD","RU","MX","JP","ET","PH","EG","CD","VN","IR","TR","DE","TH",
+  // 面積上位20（人口上位と重複しない分）
+  "CA","AU","AR","KZ","DZ","SA","SD","LY","MN","PE","TD"
+]);
+const EASY_COUNTRIES = COUNTRIES.filter(c => EASY_CODES.has(c.code));
+
+function getPool(){
+  return difficulty === "easy" ? EASY_COUNTRIES : COUNTRIES;
+}
+
 const REGION_ORDER = ["アジア","アフリカ","オセアニア","北アメリカ","南アメリカ","ヨーロッパ"];
 
 function sortCountries(list, sortMode){
@@ -746,6 +894,61 @@ let answered = false;
 let scoreCorrect = 0, scoreTotal = 0;
 let sortMode = "kana";
 let flagDisplayMode = "web"; // "web"(flagcdn画像) or "emoji"
+let difficulty = "normal"; // "normal"(196ヶ国) or "easy"(上位31ヶ国)
+let soundEnabled = true;
+
+const THEMES = {
+  tricolor: {"--navy":"#0D2B5B","--navy-deep":"#081B3D","--white":"#F5F7FA","--red":"#D01C3C","--blue-accent":"#7EB6FF","--blue-success":"#3D7DE0","--panel":"#123167","--stamp-gold":"#F0B429"},
+  african:  {"--navy":"#1F4D2E","--navy-deep":"#12301C","--white":"#FFF8E3","--red":"#D21F3C","--blue-accent":"#F4C430","--blue-success":"#6FCF6B","--panel":"#234D1E","--stamp-gold":"#F4C430"},
+  middleEast:{"--navy":"#1B1B1B","--navy-deep":"#0D0D0D","--white":"#F5F5F0","--red":"#1E7145","--blue-accent":"#2FA866","--blue-success":"#2FA866","--panel":"#242424","--stamp-gold":"#E8C168"},
+};
+
+function applyTheme(themeName){
+  const t = THEMES[themeName] || THEMES.tricolor;
+  Object.keys(t).forEach(key => document.documentElement.style.setProperty(key, t[key]));
+}
+
+let audioCtx = null;
+function playCorrectSound(){
+  if(!soundEnabled) return;
+  try{
+    if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const now = audioCtx.currentTime;
+    [523.25, 783.99].forEach((freq, i) => {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = "sine";
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0, now + i * 0.08);
+      gain.gain.linearRampToValueAtTime(0.15, now + i * 0.08 + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.08 + 0.35);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start(now + i * 0.08);
+      osc.stop(now + i * 0.08 + 0.36);
+    });
+  }catch(e){ /* オーディオ非対応環境では無音のまま続行 */ }
+}
+
+function playWrongSound(){
+  if(!soundEnabled) return;
+  try{
+    if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const now = audioCtx.currentTime;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = "sawtooth";
+    osc.frequency.setValueAtTime(180, now);
+    osc.frequency.exponentialRampToValueAtTime(85, now + 0.3);
+    gain.gain.setValueAtTime(0, now);
+    gain.gain.linearRampToValueAtTime(0.18, now + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.32);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start(now);
+    osc.stop(now + 0.33);
+  }catch(e){ /* オーディオ非対応環境では無音のまま続行 */ }
+}
 
 // ---- タイムアタック状態 ----
 const CHALLENGE_TARGET = 10;
@@ -787,6 +990,12 @@ const el = {
   sortRow: document.getElementById('sortRow'),
   sortRadios: document.querySelectorAll('input[name="sortMode"]'),
   flagDisplayRadios: document.querySelectorAll('input[name="flagDisplayMode"]'),
+  difficultyRadios: document.querySelectorAll('input[name="difficulty"]'),
+  colorThemeRadios: document.querySelectorAll('input[name="colorTheme"]'),
+  soundRadios: document.querySelectorAll('input[name="soundSetting"]'),
+  openSettingsBtn: document.getElementById('openSettingsBtn'),
+  closeSettingsBtn: document.getElementById('closeSettingsBtn'),
+  settingsModalOverlay: document.getElementById('settingsModalOverlay'),
   sizeRow: document.getElementById('sizeRow'),
   sizeSlider: document.getElementById('sizeSlider'),
   scoreCorrect: document.getElementById('scoreCorrect'),
@@ -802,6 +1011,9 @@ const el = {
   resultList: document.getElementById('resultList'),
   challengeStatus: document.getElementById('challengeStatus'),
   retryChallengeBtn: document.getElementById('retryChallengeBtn'),
+  shareText: document.getElementById('shareText'),
+  copyShareBtn: document.getElementById('copyShareBtn'),
+  shareCopiedNote: document.getElementById('shareCopiedNote'),
   endChallengeBtn: document.getElementById('endChallengeBtn'),
   setupScreen: document.getElementById('setupScreen'),
   playScreen: document.getElementById('playScreen'),
@@ -889,7 +1101,7 @@ function startChallenge(type){
   challengeResults = [];
   challengeStartTime = performance.now();
   challengeEndTime = challengeStartTime + TIME_CHALLENGE_DURATION_MS;
-  questionQueue = shuffle(COUNTRIES); // 重複しないよう新しい山札でスタート
+  questionQueue = shuffle(getPool()); // 重複しないよう新しい山札でスタート
   el.resultModalOverlay.classList.remove('show');
   updateScoreDisplayMode();
   showPlay();
@@ -918,13 +1130,18 @@ function finishChallenge(){
 
   const totalScore = challengeResults.reduce((sum, r) => sum + r.points, 0);
   const totalAnswered = challengeResults.length;
+  let shareLine1;
   if(challengeType === "count"){
     el.resultScore.innerHTML = `${totalScore.toLocaleString()}<span>点 / ${(SCORE_MAX_PER_Q*CHALLENGE_TARGET).toLocaleString()}点満点</span>`;
     el.resultSub.textContent = `${formatElapsed(elapsedMs)}秒 ・ 10問中 ${challengeCorrect}問 正解`;
+    shareLine1 = `国旗あてゲーム【10問タイムアタック】\n${totalScore.toLocaleString()}点（${formatElapsed(elapsedMs)}秒 / 正解${challengeCorrect}問）`;
   }else{
     el.resultScore.innerHTML = `${totalScore.toLocaleString()}<span>点</span>`;
     el.resultSub.textContent = `3分間で ${totalAnswered}問 回答 ・ ${challengeCorrect}問 正解`;
+    shareLine1 = `国旗あてゲーム【3分間チャレンジ】\n${totalScore.toLocaleString()}点（${totalAnswered}問回答 / 正解${challengeCorrect}問）`;
   }
+  el.shareText.value = `${shareLine1}\n${location.href}`;
+  el.shareCopiedNote.classList.remove('show');
 
   el.resultList.innerHTML = "";
   challengeResults.forEach(r => {
@@ -955,7 +1172,7 @@ function shuffle(arr){
 
 function drawNextCountry(){
   if(questionQueue.length === 0){
-    questionQueue = shuffle(COUNTRIES);
+    questionQueue = shuffle(getPool());
   }
   return questionQueue.pop();
 }
@@ -987,7 +1204,7 @@ function renderChoices(){
   el.sizeRow.style.display = mode === "nameToFlag" ? "" : "none";
   el.sortRow.style.display = mode === "flagToName" ? "" : "none";
 
-  const list = sortCountries(COUNTRIES, mode === "flagToName" ? sortMode : "kana");
+  const list = sortCountries(getPool(), mode === "flagToName" ? sortMode : "kana");
 
   el.choices.className = "choices " + (mode === "nameToFlag" ? "flags" : "names");
   el.choices.innerHTML = "";
@@ -1034,6 +1251,7 @@ function resolveQuestion({correct, btnEl, isPass}){
     el.stamp.textContent = "CORRECT";
     el.stamp.style.borderColor = "var(--stamp-gold)";
     el.stamp.style.color = "var(--stamp-gold)";
+    playCorrectSound();
   }else{
     const flagHint = mode === "nameToFlag" ? flagVisualHtml(current.code, "feedback-flag") : "";
     el.feedback.innerHTML = flagHint + (isPass
@@ -1044,6 +1262,7 @@ function resolveQuestion({correct, btnEl, isPass}){
     el.stamp.textContent = isPass ? "PASS" : "MISS";
     el.stamp.style.borderColor = "var(--red)";
     el.stamp.style.color = "var(--red)";
+    playWrongSound();
   }
   el.stamp.classList.add('show');
   el.scoreCorrect.textContent = scoreCorrect;
@@ -1092,6 +1311,31 @@ el.passBtn.addEventListener('click', handlePass);
 
 el.retryChallengeBtn.addEventListener('click', () => startChallenge(challengeType));
 
+el.copyShareBtn.addEventListener('click', async () => {
+  const text = el.shareText.value;
+  let copied = false;
+  try{
+    await navigator.clipboard.writeText(text);
+    copied = true;
+  }catch(e){
+    // クリップボードAPIが使えない環境向けフォールバック
+    try{
+      el.shareText.focus();
+      el.shareText.select();
+      copied = document.execCommand('copy');
+    }catch(e2){
+      copied = false;
+    }
+  }
+  if(copied){
+    el.shareCopiedNote.classList.add('show');
+    setTimeout(() => el.shareCopiedNote.classList.remove('show'), 2000);
+  }else{
+    el.shareText.focus();
+    el.shareText.select();
+  }
+});
+
 el.endChallengeBtn.addEventListener('click', () => {
   el.resultModalOverlay.classList.remove('show');
   scoreCorrect = 0;
@@ -1117,6 +1361,44 @@ el.flagDisplayRadios.forEach(radio => {
       flagDisplayMode = e.target.value;
     }
   });
+});
+
+el.difficultyRadios.forEach(radio => {
+  radio.addEventListener('change', (e) => {
+    if(e.target.checked){
+      difficulty = e.target.value;
+    }
+  });
+});
+
+el.colorThemeRadios.forEach(radio => {
+  radio.addEventListener('change', (e) => {
+    if(e.target.checked){
+      applyTheme(e.target.value);
+    }
+  });
+});
+
+el.soundRadios.forEach(radio => {
+  radio.addEventListener('change', (e) => {
+    if(e.target.checked){
+      soundEnabled = e.target.value === "on";
+    }
+  });
+});
+
+el.openSettingsBtn.addEventListener('click', () => {
+  el.settingsModalOverlay.classList.add('show');
+});
+
+el.closeSettingsBtn.addEventListener('click', () => {
+  el.settingsModalOverlay.classList.remove('show');
+});
+
+el.settingsModalOverlay.addEventListener('click', (e) => {
+  if(e.target === el.settingsModalOverlay){
+    el.settingsModalOverlay.classList.remove('show');
+  }
 });
 
 el.sizeSlider.addEventListener('input', (e) => {
@@ -1152,6 +1434,32 @@ el.backToSetupBtn.addEventListener('click', () => {
   if(challengeActive) stopChallengeSilently();
   showSetup();
 });
+
+// ---- 国旗Web画像が読み込める環境かどうかを起動時に判定し、読み込めない場合はWeb画像の選択肢を無効化する ----
+(function checkFlagImageAvailability(){
+  const img = new Image();
+  let settled = false;
+  const onUnavailable = () => {
+    if(settled) return;
+    settled = true;
+    flagDisplayMode = "emoji";
+    const webRadio = document.getElementById('flagDisplayWebRadio');
+    const emojiRadio = document.getElementById('flagDisplayEmojiRadio');
+    if(webRadio) webRadio.disabled = true;
+    if(emojiRadio) emojiRadio.checked = true;
+    const row = document.getElementById('flagDisplayRow');
+    if(row && !row.querySelector('.flag-display-note')){
+      const note = document.createElement('div');
+      note.className = 'flag-display-note';
+      note.textContent = 'この環境では国旗のWeb画像を読み込めないため、絵文字表示のみ利用できます';
+      row.appendChild(note);
+    }
+  };
+  img.onload = () => { settled = true; };
+  img.onerror = onUnavailable;
+  img.src = flagUrl('jp');
+  setTimeout(onUnavailable, 4000); // 応答が長すぎる場合もWeb画像不可とみなす
+})();
 </script>
 </body>
 </html>
