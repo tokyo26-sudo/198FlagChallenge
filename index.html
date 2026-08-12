@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>国旗あてゲーム 198択</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%F0%9F%87%BA%F0%9F%87%B3</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
@@ -16,6 +17,7 @@
     --blue-accent:#7EB6FF;
     --blue-success:#F5F7FA;
     --panel:#123167;
+    --stamp-gold:#F0B429;
     --line:rgba(245,247,250,0.16);
   }
   *{box-sizing:border-box; font-variant-numeric: tabular-nums;}
@@ -371,8 +373,8 @@
     position:absolute;
     top:18px;
     right:22px;
-    border:3px solid var(--blue-success);
-    color:var(--blue-success);
+    border:3px solid var(--stamp-gold);
+    color:var(--stamp-gold);
     border-radius:10px;
     padding:4px 10px;
     font-family:'Space Grotesk',sans-serif;
@@ -569,7 +571,7 @@
 <body>
 <div class="app">
   <header>
-    <div class="title">国旗あてゲーム<small>198択クイズ &middot; PROTOTYPE v0.4</small></div>
+    <div class="title">国旗あてゲーム<small>198択クイズ &middot; PROTOTYPE v0.5</small></div>
   </header>
 
   <div id="setupScreen">
@@ -578,9 +580,16 @@
       <button id="modeFlagToName">国旗 → 国名を選ぶ</button>
     </div>
 
+    <div class="sort-row" id="flagDisplayRow">
+      <span class="sort-label">国旗の表示</span>
+      <label class="opt"><input type="radio" name="flagDisplayMode" value="web" checked>Web画像</label>
+      <label class="opt"><input type="radio" name="flagDisplayMode" value="emoji">絵文字</label>
+    </div>
+
     <div class="play-start-row">
       <button id="startNormalBtn" class="start-btn normal">▶ ふつうに遊ぶ<small>好きなだけ問題を解く</small></button>
       <button id="startChallengeBtn" class="start-btn challenge">⏱ 10問タイムアタック<small>何秒で答えられるか競う</small></button>
+      <button id="startTimeChallengeBtn" class="start-btn challenge">⏳ 3分間チャレンジ<small>3分でどれだけ答えられるか</small></button>
     </div>
   </div>
 
@@ -736,13 +745,17 @@ let current = null;
 let answered = false;
 let scoreCorrect = 0, scoreTotal = 0;
 let sortMode = "kana";
+let flagDisplayMode = "web"; // "web"(flagcdn画像) or "emoji"
 
 // ---- タイムアタック状態 ----
 const CHALLENGE_TARGET = 10;
+const TIME_CHALLENGE_DURATION_MS = 3 * 60 * 1000;
 let challengeActive = false;
+let challengeType = "count"; // "count" (10問) or "time" (3分間)
 let challengeCount = 0;
 let challengeCorrect = 0;
 let challengeStartTime = 0;
+let challengeEndTime = 0;
 let challengeTimerId = null;
 let questionStartTime = 0;
 let challengeResults = []; // {code, name, correct, isPass, timeSec, points}
@@ -756,6 +769,13 @@ function scoreForAnswer(correct, isPass, timeSec){
   return Math.max(0, Math.round(pts));
 }
 
+function formatCountdown(ms){
+  const totalSec = Math.max(0, Math.ceil(ms / 1000));
+  const m = Math.floor(totalSec / 60);
+  const s = totalSec % 60;
+  return `${m}:${String(s).padStart(2, '0')}`;
+}
+
 const el = {
   questionArea: document.getElementById('questionArea'),
   stageLabel: document.getElementById('stageLabel'),
@@ -766,6 +786,7 @@ const el = {
   passBtn: document.getElementById('passBtn'),
   sortRow: document.getElementById('sortRow'),
   sortRadios: document.querySelectorAll('input[name="sortMode"]'),
+  flagDisplayRadios: document.querySelectorAll('input[name="flagDisplayMode"]'),
   sizeRow: document.getElementById('sizeRow'),
   sizeSlider: document.getElementById('sizeSlider'),
   scoreCorrect: document.getElementById('scoreCorrect'),
@@ -786,6 +807,7 @@ const el = {
   playScreen: document.getElementById('playScreen'),
   startNormalBtn: document.getElementById('startNormalBtn'),
   startChallengeBtn: document.getElementById('startChallengeBtn'),
+  startTimeChallengeBtn: document.getElementById('startTimeChallengeBtn'),
   backToSetupBtn: document.getElementById('backToSetupBtn'),
 };
 
@@ -815,6 +837,9 @@ function handleFlagImgError(imgEl){
 window.handleFlagImgError = handleFlagImgError;
 
 function flagVisualHtml(code, containerClass){
+  if(flagDisplayMode === "emoji"){
+    return `<div class="${containerClass} emoji" data-code="${code}">${flagEmojiSvg(code)}</div>`;
+  }
   return `<div class="${containerClass}" data-code="${code}"><img src="${flagUrl(code)}" alt="${code}" onerror="handleFlagImgError(this)"></div>`;
 }
 
@@ -825,6 +850,15 @@ function formatElapsed(ms){
 function updateChallengeStatus(){
   if(!challengeActive){
     el.challengeStatus.textContent = "";
+    return;
+  }
+  if(challengeType === "time"){
+    const remaining = challengeEndTime - performance.now();
+    if(remaining <= 0){
+      finishChallenge();
+      return;
+    }
+    el.challengeStatus.textContent = `残り ${formatCountdown(remaining)}　・　${challengeCount}問 回答済み`;
     return;
   }
   if(answered) return; // 回答後は表示を凍結（待ち時間ぶん伸び続けるのを防ぐ）
@@ -847,13 +881,15 @@ function updateScoreDisplayMode(){
   el.challengeStatus.style.display = challengeActive ? "" : "none";
 }
 
-function startChallenge(){
+function startChallenge(type){
+  challengeType = type || "count";
   challengeActive = true;
   challengeCount = 0;
   challengeCorrect = 0;
   challengeResults = [];
   challengeStartTime = performance.now();
-  questionQueue = shuffle(COUNTRIES); // 10問の中で重複しないよう新しい山札でスタート
+  challengeEndTime = challengeStartTime + TIME_CHALLENGE_DURATION_MS;
+  questionQueue = shuffle(COUNTRIES); // 重複しないよう新しい山札でスタート
   el.resultModalOverlay.classList.remove('show');
   updateScoreDisplayMode();
   showPlay();
@@ -881,8 +917,14 @@ function finishChallenge(){
   el.resultModalOverlay.classList.add('show');
 
   const totalScore = challengeResults.reduce((sum, r) => sum + r.points, 0);
-  el.resultScore.innerHTML = `${totalScore.toLocaleString()}<span>点 / ${(SCORE_MAX_PER_Q*CHALLENGE_TARGET).toLocaleString()}点満点</span>`;
-  el.resultSub.textContent = `${formatElapsed(elapsedMs)}秒 ・ 10問中 ${challengeCorrect}問 正解`;
+  const totalAnswered = challengeResults.length;
+  if(challengeType === "count"){
+    el.resultScore.innerHTML = `${totalScore.toLocaleString()}<span>点 / ${(SCORE_MAX_PER_Q*CHALLENGE_TARGET).toLocaleString()}点満点</span>`;
+    el.resultSub.textContent = `${formatElapsed(elapsedMs)}秒 ・ 10問中 ${challengeCorrect}問 正解`;
+  }else{
+    el.resultScore.innerHTML = `${totalScore.toLocaleString()}<span>点</span>`;
+    el.resultSub.textContent = `3分間で ${totalAnswered}問 回答 ・ ${challengeCorrect}問 正解`;
+  }
 
   el.resultList.innerHTML = "";
   challengeResults.forEach(r => {
@@ -990,8 +1032,8 @@ function resolveQuestion({correct, btnEl, isPass}){
     el.feedback.className = "feedback correct";
     if(btnEl) btnEl.classList.add('correct');
     el.stamp.textContent = "CORRECT";
-    el.stamp.style.borderColor = "var(--blue-success)";
-    el.stamp.style.color = "var(--blue-success)";
+    el.stamp.style.borderColor = "var(--stamp-gold)";
+    el.stamp.style.color = "var(--stamp-gold)";
   }else{
     const flagHint = mode === "nameToFlag" ? flagVisualHtml(current.code, "feedback-flag") : "";
     el.feedback.innerHTML = flagHint + (isPass
@@ -1026,10 +1068,18 @@ function resolveQuestion({correct, btnEl, isPass}){
     });
     challengeCount++;
     if(correct) challengeCorrect++;
-    el.challengeStatus.textContent = `${formatElapsed(timeSec * 1000)}秒で回答　・　${challengeCount} / ${CHALLENGE_TARGET} 問目`;
-    if(challengeCount >= CHALLENGE_TARGET){
-      setTimeout(finishChallenge, 500);
-      return;
+    if(challengeType === "count"){
+      el.challengeStatus.textContent = `${formatElapsed(timeSec * 1000)}秒で回答　・　${challengeCount} / ${CHALLENGE_TARGET} 問目`;
+      if(challengeCount >= CHALLENGE_TARGET){
+        setTimeout(finishChallenge, 500);
+        return;
+      }
+    }else{
+      // 3分間チャレンジ：残り時間が尽きるまで継続。時間切れはタイマー側(updateChallengeStatus)で検知
+      if(challengeEndTime - performance.now() <= 0){
+        setTimeout(finishChallenge, 500);
+        return;
+      }
     }
   }
 
@@ -1040,7 +1090,7 @@ el.nextBtn.addEventListener('click', pickQuestion);
 
 el.passBtn.addEventListener('click', handlePass);
 
-el.retryChallengeBtn.addEventListener('click', startChallenge);
+el.retryChallengeBtn.addEventListener('click', () => startChallenge(challengeType));
 
 el.endChallengeBtn.addEventListener('click', () => {
   el.resultModalOverlay.classList.remove('show');
@@ -1056,6 +1106,15 @@ el.sortRadios.forEach(radio => {
   radio.addEventListener('change', (e) => {
     if(e.target.checked){
       sortMode = e.target.value;
+      renderChoices();
+    }
+  });
+});
+
+el.flagDisplayRadios.forEach(radio => {
+  radio.addEventListener('change', (e) => {
+    if(e.target.checked){
+      flagDisplayMode = e.target.value;
     }
   });
 });
@@ -1086,7 +1145,8 @@ el.startNormalBtn.addEventListener('click', () => {
   pickQuestion();
 });
 
-el.startChallengeBtn.addEventListener('click', startChallenge);
+el.startChallengeBtn.addEventListener('click', () => startChallenge('count'));
+el.startTimeChallengeBtn.addEventListener('click', () => startChallenge('time'));
 
 el.backToSetupBtn.addEventListener('click', () => {
   if(challengeActive) stopChallengeSilently();
