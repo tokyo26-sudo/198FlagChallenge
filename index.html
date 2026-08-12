@@ -75,6 +75,9 @@
     filter:none;
     border-color:var(--blue-accent);
   }
+  @media (max-width:480px){
+    body.in-play header{display:none;}
+  }
   .title{
     font-family:'Space Grotesk', sans-serif;
     font-weight:700;
@@ -585,6 +588,28 @@
     display:flex;
     align-items:center;
     gap:12px;
+    flex-wrap:wrap;
+  }
+  .size-row input[type="range"]{
+    flex:0 1 140px;
+  }
+  .flag-sort-options{
+    display:flex;
+    gap:12px;
+    align-items:center;
+  }
+  .flag-sort-options label.opt{
+    display:flex;
+    align-items:center;
+    gap:4px;
+    font-size:12px;
+    cursor:pointer;
+    white-space:nowrap;
+  }
+  .flag-sort-options input[type="radio"]{accent-color:var(--blue-accent);}
+  @media (max-width:480px){
+    .size-row input[type="range"]{flex:1 1 100%; order:1;}
+    .flag-sort-options{flex-basis:100%; order:2;}
   }
   .size-row label{
     font-size:12px;
@@ -700,7 +725,7 @@
 <body>
 <div class="app">
   <header>
-    <div class="title"><span data-i18n="titleText">199択国旗クイズ</span><small>v0.24</small></div>
+    <div class="title"><span data-i18n="titleText">199択国旗クイズ</span><small>v0.29</small></div>
     <div class="lang-toggle">
       <button class="lang-flag-btn active" id="langFlagJa" title="日本語">🇯🇵</button>
       <button class="lang-flag-btn" id="langFlagEn" title="English">🇬🇧</button>
@@ -771,10 +796,10 @@
 
   <div id="playScreen" style="display:none;">
     <div class="play-topbar">
-      <button class="back-btn" id="backToSetupBtn" data-i18n="backToSetup">← 設定に戻る</button>
+      <button class="back-btn" id="backToSetupBtn" data-i18n="backToSetup">← 戻る</button>
       <div class="score" id="normalScoreDisplay">正解 <b id="scoreCorrect">0</b> / <span id="normalTargetDisplay">0</span></div>
       <div class="challenge-status" id="challengeStatus" style="display:none;"></div>
-      <button class="back-btn giveup-btn" id="giveUpBtn" data-i18n="giveUp">🏳️ ギブアップ</button>
+      <button class="back-btn giveup-btn" id="giveUpBtn" data-i18n="giveUp">🏳️ 降参</button>
     </div>
 
     <div class="stage" id="mainStage">
@@ -791,11 +816,14 @@
     <div class="size-row" id="sizeRow">
       <label for="sizeSlider" data-i18n="sizeLabel">国旗の大きさ</label>
       <input type="range" id="sizeSlider" min="140" max="420" step="10" value="260">
+      <div class="flag-sort-options" id="flagSortRow">
+        <label class="opt" id="flagSortKanaOpt"><input type="radio" name="sortMode" value="kana"><span data-i18n="sortKana">アイウエオ順</span></label>
+        <label class="opt"><input type="radio" name="sortMode" value="region"><span data-i18n="sortRegionShort">地域順</span></label>
+      </div>
     </div>
 
-    <div class="sort-row" id="sortRow">
-      <span class="sort-label" data-i18n="sortLabel">並び順</span>
-      <label class="opt" id="sortKanaOpt"><input type="radio" name="sortMode" value="kana" checked><span data-i18n="sortKana">あいうえお順</span></label>
+    <div class="sort-row" id="sortRow">      <span class="sort-label" data-i18n="sortLabel">並び順</span>
+      <label class="opt" id="sortKanaOpt"><input type="radio" name="sortMode" value="kana"><span data-i18n="sortKana">あいうえお順</span></label>
       <label class="opt"><input type="radio" name="sortMode" value="region"><span data-i18n="sortRegion">地域別（あいうえお順）</span></label>
       <label class="opt"><input type="radio" name="sortMode" value="en"><span data-i18n="sortEn">アルファベット順（英語表記）</span></label>
     </div>
@@ -824,7 +852,7 @@
     </div>
   </div>
 
-  <footer><span data-i18n="footerNote">国連加盟国193＋日本承認の非国連加盟国4（バチカン・コソボ・ニウエ・クック諸島）＋国際的に広く国として扱われる2（台湾・パレスチナ）＝199ヶ国</span> &middot; PROTOTYPE v0.24</footer>
+  <footer><span data-i18n="footerNote">国連加盟国193＋日本承認の非国連加盟国4（バチカン・コソボ・ニウエ・クック諸島）＋国際的に広く国として扱われる2（台湾・パレスチナ）＝199ヶ国</span> &middot; PROTOTYPE v0.29</footer>
 </div>
 
 <script>
@@ -922,16 +950,89 @@ function getPool(){
 const REGION_ORDER = ["アジア","アフリカ","オセアニア","北アメリカ","南アメリカ","ヨーロッパ"];
 
 // 4択モード用：正解と同じ地域から紛らわしい3ヶ国を選ぶ（地域内が足りない場合はプール全体から補う）
+// 4択モード用：見た目が紛らわしい有名な国旗グループ（手動キュレーション）
+const CONFUSABLE_GROUPS = [
+  ["US","LR","MY","CL","CU"],             // 星条旗系（縞＋左上カントン）
+  ["DK","NO","SE","FI","IS"],             // 北欧十字
+  ["EG","YE","SY","SD","IQ","AE","JO","PS","KW"], // 汎アラブ色（赤白黒緑）
+  ["ML","GN","SN","CM"],                  // 緑黄赤の縦三色（ほぼ同じ配色）
+  ["ET","GH","BJ"],                       // 汎アフリカ色（横縞＋中央紋章）
+  ["RO","TD","MD","AD"],                  // 青黄赤の縦三色（ルーマニアとチャドは激似）
+  ["IE","CI"],                            // 緑白橙 vs 橙白緑（鏡写し）
+  ["NL","LU"],                            // 赤白青の横三色（激似）
+  ["AU","NZ"],                            // 南十字星＋ユニオンジャック
+  ["ID","MC","PL"],                       // 赤白系バイカラー
+  ["CO","EC","VE"],                       // 大コロンビア系（黄青赤の横三色）
+  ["AR","UY"],                            // 太陽入り横縞
+  ["SI","SK","RU","RS"],                  // 白青赤系スラブ諸国
+  ["TR","TN","DZ","AZ","PK"],             // 三日月と星（イスラム系デザイン）
+];
+const CONFUSABLE_GROUP_MAP = {};
+CONFUSABLE_GROUPS.forEach(group => {
+  group.forEach(code => { CONFUSABLE_GROUP_MAP[code] = group; });
+});
+
+// 国旗→国名モード用：名前が紛らわしい国のグループ（手動キュレーション）
+const NAME_CONFUSABLE_GROUPS = [
+  ["IR","IQ","IN"],       // イラン・イラク・インド
+  ["DZ","NG","NE"],       // アルジェリア・ナイジェリア・ニジェール
+  ["AT","AU"],            // オーストリア・オーストラリア
+  ["SK","SI"],            // スロバキア・スロベニア
+  ["GN","GW","GQ","PG"],  // ギニア・ギニアビサウ・赤道ギニア・パプアニューギニア
+  ["CG","CD"],            // コンゴ共和国・コンゴ民主共和国
+  ["DO","DM"],            // ドミニカ共和国・ドミニカ国
+  ["MR","MU"],            // モーリタニア・モーリシャス
+  ["SR","LK"],            // スリナム・スリランカ
+  ["LR","LY"],            // リベリア・リビア
+  ["LV","LT"],            // ラトビア・リトアニア
+  ["PY","UY"],            // パラグアイ・ウルグアイ
+  ["KN","VC","AG","TT","LC","BA","ST"], // 名前が長い・複合語で紛らわしい国々
+];
+const NAME_CONFUSABLE_GROUP_MAP = {};
+NAME_CONFUSABLE_GROUPS.forEach(group => {
+  group.forEach(code => { NAME_CONFUSABLE_GROUP_MAP[code] = group; });
+});
+
 function pickFourChoiceOptions(pool, correctCountry){
-  const sameRegion = shuffle(pool.filter(c => c.region === correctCountry.region && c.code !== correctCountry.code));
-  const distractors = sameRegion.slice(0, 3);
-  if(distractors.length < 3){
-    const usedCodes = new Set([correctCountry.code, ...distractors.map(c => c.code)]);
-    const rest = shuffle(pool.filter(c => !usedCodes.has(c.code)));
-    while(distractors.length < 3 && rest.length){
-      distractors.push(rest.pop());
+  const distractors = [];
+  const usedCodes = new Set([correctCountry.code]);
+
+  // ① 見た目（国名→国旗モード）or 名前（国旗→国名モード）が紛らわしい有名グループを最優先で使う
+  const groupMap = mode === "nameToFlag" ? CONFUSABLE_GROUP_MAP : NAME_CONFUSABLE_GROUP_MAP;
+  const confusableGroup = groupMap[correctCountry.code];
+  if(confusableGroup){
+    const confusableCandidates = shuffle(
+      pool.filter(c => confusableGroup.includes(c.code) && !usedCodes.has(c.code))
+    );
+    for(const c of confusableCandidates){
+      if(distractors.length >= 3) break;
+      distractors.push(c);
+      usedCodes.add(c.code);
     }
   }
+
+  // ② 足りない分は同じ地域から補う
+  if(distractors.length < 3){
+    const sameRegion = shuffle(
+      pool.filter(c => c.region === correctCountry.region && !usedCodes.has(c.code))
+    );
+    for(const c of sameRegion){
+      if(distractors.length >= 3) break;
+      distractors.push(c);
+      usedCodes.add(c.code);
+    }
+  }
+
+  // ③ それでも足りなければ全体からランダムに補う
+  if(distractors.length < 3){
+    const rest = shuffle(pool.filter(c => !usedCodes.has(c.code)));
+    while(distractors.length < 3 && rest.length){
+      const c = rest.pop();
+      distractors.push(c);
+      usedCodes.add(c.code);
+    }
+  }
+
   return shuffle([correctCountry, ...distractors]);
 }
 
@@ -996,9 +1097,9 @@ const T = {
     soundOn: "鳴らす",
     soundOff: "鳴らさない",
     closeSettings: "閉じる",
-    backToSetup: "← 設定に戻る",
-    giveUp: "🏳️ ギブアップ",
-    giveUpConfirm: "ここでギブアップしますか？ここまでの結果を表示します。",
+    backToSetup: "← 戻る",
+    giveUp: "🏳️ 降参",
+    giveUpConfirm: "ここで降参しますか？ここまでの結果を表示します。",
     passBtn: "わからない（パス）",
     nextBtn: "次の問題 →",
     stageLabelNameToFlag: "この国の国旗はどれ？",
@@ -1007,6 +1108,7 @@ const T = {
     sortLabel: "並び順",
     sortKana: "あいうえお順",
     sortRegion: "地域別（あいうえお順）",
+    sortRegionShort: "地域順",
     sortEn: "アルファベット順（英語表記）",
     shareLabel: "SNSでシェア",
     copyBtn: "📋 コピー",
@@ -1020,14 +1122,14 @@ const T = {
     resultTitleTimeAttack: "Time Attack Result",
     resultTitleComplete: "Complete!",
     resultTitleGiveUp: "Give Up",
-    elapsedRemaining: (t, n) => `残り ${t}　・　${n}問 回答済み`,
-    elapsedThisQ: (t, n, target) => `この問題 ${t}秒　・　${n} / ${target} 問目`,
-    elapsedThisQAnswered: (t, n, target) => `${t}秒で回答　・　${n} / ${target} 問目`,
-    resultSubCountGaveUp: (t, total, correct) => `${t}秒 ・ ${total}問に挑戦し ${correct}問 正解（ギブアップ）`,
+    elapsedRemaining: (t, n) => `⏱️ 残り ${t}　・　${n}問 回答済み`,
+    elapsedThisQ: (t, n, target) => `⏱️ ${t}秒　・　${n} / ${target} 問目`,
+    elapsedThisQAnswered: (t, n, target) => `⏱️ ${t}秒で回答　・　${n} / ${target} 問目`,
+    resultSubCountGaveUp: (t, total, correct) => `${t}秒 ・ ${total}問に挑戦し ${correct}問 正解（降参）`,
     resultSubCountDone: (t, correct) => `${t}秒 ・ 10問中 ${correct}問 正解`,
     resultSubTime: (total, correct) => `3分間で ${total}問 回答 ・ ${correct}問 正解`,
     resultSubLapDone: (target) => `全${target}問 完了`,
-    resultSubLapGiveUp: (n) => `${n}問に挑戦して終了（ギブアップ）`,
+    resultSubLapGiveUp: (n) => `${n}問に挑戦して終了（降参）`,
     scoreOutOf: (total) => `点 / ${total}点満点`,
     scoreSuffix: "点",
     correctOutOf: (target) => ` / ${target}問 正解`,
@@ -1076,6 +1178,7 @@ const T = {
     sortLabel: "Sort order",
     sortKana: "Japanese order",
     sortRegion: "By region (A-Z)",
+    sortRegionShort: "By region",
     sortEn: "Alphabetical (A-Z)",
     shareLabel: "Share on SNS",
     copyBtn: "📋 Copy",
@@ -1089,9 +1192,9 @@ const T = {
     resultTitleTimeAttack: "Time Attack Result",
     resultTitleComplete: "Complete!",
     resultTitleGiveUp: "Give Up",
-    elapsedRemaining: (t, n) => `${t} left　・　${n} answered`,
-    elapsedThisQ: (t, n, target) => `${t}s on this Q　・　${n} / ${target}`,
-    elapsedThisQAnswered: (t, n, target) => `Answered in ${t}s　・　${n} / ${target}`,
+    elapsedRemaining: (t, n) => `⏱️ ${t} left　・　${n} answered`,
+    elapsedThisQ: (t, n, target) => `⏱️ ${t}s　・　${n} / ${target}`,
+    elapsedThisQAnswered: (t, n, target) => `⏱️ Answered in ${t}s　・　${n} / ${target}`,
     resultSubCountGaveUp: (t, total, correct) => `${t}s ・ Attempted ${total}, got ${correct} right (gave up)`,
     resultSubCountDone: (t, correct) => `${t}s ・ ${correct} / 10 correct`,
     resultSubTime: (total, correct) => `${total} answered in 3 min ・ ${correct} correct`,
@@ -1130,15 +1233,14 @@ function applyLanguage(newLang){
   el.langFlagJa.classList.toggle('active', lang === "ja");
   el.langFlagEn.classList.toggle('active', lang === "en");
   // 「あいうえお順」は英語だと意味をなさないため、英語モードでは非表示にしてアルファベット順に切り替える
-  const kanaOpt = document.getElementById('sortKanaOpt');
-  if(kanaOpt){
-    kanaOpt.style.display = lang === "en" ? "none" : "";
-  }
+  ["sortKanaOpt", "flagSortKanaOpt"].forEach(id => {
+    const opt = document.getElementById(id);
+    if(opt) opt.style.display = lang === "en" ? "none" : "";
+  });
   if(lang === "en" && sortMode === "kana"){
     sortMode = "en";
-    const enRadio = document.querySelector('input[name="sortMode"][value="en"]');
-    if(enRadio) enRadio.checked = true;
   }
+  syncSortRadios();
   el.stageLabel.textContent = mode === "nameToFlag" ? T[lang].stageLabelNameToFlag : T[lang].stageLabelFlagToName;
   if(current) renderChoices();
 }
@@ -1203,13 +1305,15 @@ let challengeTimerId = null;
 let questionStartTime = 0;
 let challengeResults = []; // {code, name, correct, isPass, timeSec, points}
 const SCORE_MAX_PER_Q = 1000;
-const SCORE_DECAY_PER_TENTH = 1; // 1秒を超えてから0.1秒ごとに減点（0点になるのは501秒後）
+const SCORE_DECAY_PER_TENTH_ALL = 1;  // 199択：0.1秒ごとに1点減点（0点になるのは約101秒後）
+const SCORE_DECAY_PER_TENTH_FOUR = 10; // 4択：0.1秒ごとに10点減点（1秒で100点減点）
 
 function scoreForAnswer(correct, isPass, timeSec){
   if(isPass || !correct) return 0;
+  const decayRate = answerFormat === "four" ? SCORE_DECAY_PER_TENTH_FOUR : SCORE_DECAY_PER_TENTH_ALL;
   const overSeconds = Math.max(0, timeSec - 1);
-  const pts = SCORE_MAX_PER_Q - SCORE_DECAY_PER_TENTH * (overSeconds * 10);
-  return Math.max(0, Math.round(pts));
+  const pts = SCORE_MAX_PER_Q - decayRate * (overSeconds * 10);
+  return Math.max(1, Math.round(pts)); // 正解なら時間切れでも最低1点は入る
 }
 
 function formatCountdown(ms){
@@ -1240,6 +1344,7 @@ const el = {
   closeSettingsBtn: document.getElementById('closeSettingsBtn'),
   settingsModalOverlay: document.getElementById('settingsModalOverlay'),
   sizeRow: document.getElementById('sizeRow'),
+  flagSortRow: document.getElementById('flagSortRow'),
   sizeSlider: document.getElementById('sizeSlider'),
   scoreCorrect: document.getElementById('scoreCorrect'),
   normalTargetDisplay: document.getElementById('normalTargetDisplay'),
@@ -1326,11 +1431,13 @@ function updateChallengeStatus(){
 function showSetup(){
   el.setupScreen.style.display = "";
   el.playScreen.style.display = "none";
+  document.body.classList.remove('in-play');
 }
 
 function showPlay(){
   el.setupScreen.style.display = "none";
   el.playScreen.style.display = "";
+  document.body.classList.add('in-play');
 }
 
 function updateScoreDisplayMode(){
@@ -1455,11 +1562,12 @@ function renderQuestion(){
 
 function renderChoices(){
   el.sizeRow.style.display = mode === "nameToFlag" ? "" : "none";
+  el.flagSortRow.style.display = (mode === "nameToFlag" && answerFormat === "all") ? "" : "none";
   el.sortRow.style.display = (mode === "flagToName" && answerFormat === "all") ? "" : "none";
 
   const list = answerFormat === "four"
-    ? pickFourChoiceOptions(getPool(), current)
-    : sortCountries(getPool(), mode === "flagToName" ? sortMode : "kana");
+    ? pickFourChoiceOptions(COUNTRIES, current)
+    : sortCountries(COUNTRIES, sortMode);
 
   el.choices.className = "choices " + (mode === "nameToFlag" ? "flags" : "names");
   el.choices.innerHTML = "";
@@ -1611,10 +1719,17 @@ el.endChallengeBtn.addEventListener('click', () => {
   showSetup();
 });
 
+function syncSortRadios(){
+  document.querySelectorAll('input[name="sortMode"]').forEach(r => {
+    r.checked = (r.value === sortMode);
+  });
+}
+
 el.sortRadios.forEach(radio => {
   radio.addEventListener('change', (e) => {
     if(e.target.checked){
       sortMode = e.target.value;
+      syncSortRadios();
       renderChoices();
     }
   });
@@ -1767,6 +1882,8 @@ el.giveUpBtn.addEventListener('click', () => {
   img.src = flagUrl('jp');
   setTimeout(onUnavailable, 4000); // 応答が長すぎる場合もWeb画像不可とみなす
 })();
+
+syncSortRadios();
 </script>
 </body>
 </html>
