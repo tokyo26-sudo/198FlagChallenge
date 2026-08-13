@@ -771,7 +771,7 @@
 <body>
 <div class="app">
   <header>
-    <div class="title"><span data-i18n="titleText">199択国旗クイズ</span><small>v0.40</small></div>
+    <div class="title"><span data-i18n="titleText">199択国旗クイズ</span><small>v0.41</small></div>
     <div class="lang-toggle">
       <button class="lang-flag-btn active" id="langFlagJa" title="日本語">🇯🇵</button>
       <button class="lang-flag-btn" id="langFlagEn" title="English">🇬🇧</button>
@@ -899,7 +899,7 @@
     </div>
   </div>
 
-  <footer><span data-i18n="footerNote">国連加盟国193＋日本承認の非国連加盟国4（バチカン・コソボ・ニウエ・クック諸島）＋国際的に広く国として扱われる2（台湾・パレスチナ）＝199ヶ国</span> &middot; PROTOTYPE v0.40</footer>
+  <footer><span data-i18n="footerNote">国連加盟国193＋日本承認の非国連加盟国4（バチカン・コソボ・ニウエ・クック諸島）＋国際的に広く国として扱われる2（台湾・パレスチナ）＝199ヶ国</span> &middot; PROTOTYPE v0.41</footer>
 </div>
 
 <script>
@@ -1295,7 +1295,10 @@ function applyLanguage(newLang){
   }
   syncSortRadios();
   el.stageLabel.textContent = mode === "nameToFlag" ? T[lang].stageLabelNameToFlag : T[lang].stageLabelFlagToName;
-  if(current) renderChoices();
+  if(current){
+    renderQuestion();
+    renderChoices();
+  }
 }
 
 function applyTheme(themeName){
