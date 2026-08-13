@@ -771,7 +771,7 @@
 <body>
 <div class="app">
   <header>
-    <div class="title"><span data-i18n="titleText">199択国旗クイズ</span><small>v0.39</small></div>
+    <div class="title"><span data-i18n="titleText">199択国旗クイズ</span><small>v0.40</small></div>
     <div class="lang-toggle">
       <button class="lang-flag-btn active" id="langFlagJa" title="日本語">🇯🇵</button>
       <button class="lang-flag-btn" id="langFlagEn" title="English">🇬🇧</button>
@@ -899,7 +899,7 @@
     </div>
   </div>
 
-  <footer><span data-i18n="footerNote">国連加盟国193＋日本承認の非国連加盟国4（バチカン・コソボ・ニウエ・クック諸島）＋国際的に広く国として扱われる2（台湾・パレスチナ）＝199ヶ国</span> &middot; PROTOTYPE v0.39</footer>
+  <footer><span data-i18n="footerNote">国連加盟国193＋日本承認の非国連加盟国4（バチカン・コソボ・ニウエ・クック諸島）＋国際的に広く国として扱われる2（台湾・パレスチナ）＝199ヶ国</span> &middot; PROTOTYPE v0.40</footer>
 </div>
 
 <script>
@@ -1366,9 +1366,8 @@ function scoreForAnswer(correct, isPass, timeSec){
   const overSeconds = Math.max(0, timeSec - 1);
   let pts;
   if(answerFormat === "four"){
-    // 4択：反比例系カーブ（最初はグーンと減り、だんだん減り方が緩やかになる）
-    // pts = MAX / (1 + overSeconds)^1.3 　→　1秒後406点、2秒後240点、3秒後165点…と緩やかに減衰
-    pts = SCORE_MAX_PER_Q / Math.pow(1 + overSeconds, 1.3);
+    // 4択：一次関数（比例）で減点、0.1秒ごとに10点
+    pts = SCORE_MAX_PER_Q - SCORE_DECAY_PER_TENTH_FOUR * (overSeconds * 10);
   } else {
     // 199択：従来どおり一次関数（比例）で減点
     pts = SCORE_MAX_PER_Q - SCORE_DECAY_PER_TENTH_ALL * (overSeconds * 10);
