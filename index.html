@@ -771,7 +771,7 @@
 <body>
 <div class="app">
   <header>
-    <div class="title"><span data-i18n="titleText">199択国旗クイズ</span><small>v0.41</small></div>
+    <div class="title"><span data-i18n="titleText">199択国旗クイズ</span><small>v0.43</small></div>
     <div class="lang-toggle">
       <button class="lang-flag-btn active" id="langFlagJa" title="日本語">🇯🇵</button>
       <button class="lang-flag-btn" id="langFlagEn" title="English">🇬🇧</button>
@@ -899,7 +899,7 @@
     </div>
   </div>
 
-  <footer><span data-i18n="footerNote">国連加盟国193＋日本承認の非国連加盟国4（バチカン・コソボ・ニウエ・クック諸島）＋国際的に広く国として扱われる2（台湾・パレスチナ）＝199ヶ国</span> &middot; PROTOTYPE v0.41</footer>
+  <footer><span data-i18n="footerNote">国連加盟国193＋日本承認の非国連加盟国4（バチカン・コソボ・ニウエ・クック諸島）＋国際的に広く国として扱われる2（台湾・パレスチナ）＝199ヶ国</span> &middot; PROTOTYPE v0.43</footer>
 </div>
 
 <script>
@@ -1549,6 +1549,17 @@ function finishChallenge(){
   const totalScore = challengeResults.reduce((sum, r) => sum + r.points, 0);
   const totalAnswered = challengeResults.length;
   const gaveUp = challengeType === "count" ? totalAnswered < CHALLENGE_TARGET : false;
+  const modeLabel = lang === "en"
+    ? (mode === "nameToFlag" ? "🇺🇳Flag→Country" : "💬Country→Flag")
+    : (mode === "nameToFlag" ? "🇺🇳国旗解答" : "💬国名解答");
+  const formatLabel = lang === "en"
+    ? (answerFormat === "four" ? "4-Choice" : "199-Choice")
+    : (answerFormat === "four" ? "4択" : "199択");
+  const difficultyLabel = lang === "en"
+    ? (difficulty === "easy" ? "Easy" : "Normal")
+    : (difficulty === "easy" ? "かんたん" : "通常");
+  const correctFlags = challengeResults.filter(r => r.correct).map(r => flagEmoji(r.code)).join("");
+
   let shareLine1;
   if(challengeType === "count"){
     const maxPossible = SCORE_MAX_PER_Q * totalAnswered;
@@ -1556,11 +1567,15 @@ function finishChallenge(){
     el.resultSub.textContent = gaveUp
       ? T[lang].resultSubCountGaveUp(formatElapsed(elapsedMs), totalAnswered, challengeCorrect)
       : T[lang].resultSubCountDone(formatElapsed(elapsedMs), challengeCorrect);
-    shareLine1 = `199択国旗クイズ【10問タイムアタック】\n${totalScore.toLocaleString()}点（${formatElapsed(elapsedMs)}秒 / 正解${challengeCorrect}問）`;
+    shareLine1 = lang === "en"
+      ? `🏁Flag Quiz 199【10-Question Time Attack】\n${modeLabel}／${formatLabel}／${difficultyLabel}\n${correctFlags}\n🏆${totalScore.toLocaleString()} pts (${formatElapsed(elapsedMs)}s / ${challengeCorrect} correct)`
+      : `🏁199択国旗クイズ【10問タイムアタック】\n${modeLabel}／${formatLabel}／${difficultyLabel}\n${correctFlags}\n🏆${totalScore.toLocaleString()}点（${formatElapsed(elapsedMs)}秒 / 正解${challengeCorrect}問）`;
   }else{
     el.resultScore.innerHTML = `${totalScore.toLocaleString()}<span>${T[lang].scoreSuffix}</span>`;
     el.resultSub.textContent = T[lang].resultSubTime(totalAnswered, challengeCorrect);
-    shareLine1 = `199択国旗クイズ【3分間チャレンジ】\n${totalScore.toLocaleString()}点（${totalAnswered}問回答 / 正解${challengeCorrect}問）`;
+    shareLine1 = lang === "en"
+      ? `⏱Flag Quiz 199【3-Minute Challenge】\n${modeLabel}／${formatLabel}／${difficultyLabel}\n${correctFlags}\n🏆${totalScore.toLocaleString()} pts (${totalAnswered} answered / ${challengeCorrect} correct)`
+      : `⏱199択国旗クイズ【3分間チャレンジ】\n${modeLabel}／${formatLabel}／${difficultyLabel}\n${correctFlags}\n🏆${totalScore.toLocaleString()}点（${totalAnswered}問回答 / 正解${challengeCorrect}問）`;
   }
   el.shareText.value = `${shareLine1}\n${location.href}`;
   el.shareCopiedNote.classList.remove('show');
